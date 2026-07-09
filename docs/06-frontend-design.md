@@ -10,7 +10,9 @@ React 18 + TypeScript + Vite. 시각 규칙은 `05-design-system.md`, 화면 목
 | 서버 상태 | TanStack Query | 이 앱 상태의 대부분이 서버 데이터의 캐시(슬롯·예약·알림·지표). 캐싱·재검증·로딩/에러 상태를 선언적으로. **Redux류 미도입** — 전역 클라이언트 상태는 인증뿐이라 Context 하나로 충분 |
 | API 타입 | openapi-typescript | FastAPI의 `/openapi.json` → TS 타입 자동 생성. 백엔드 스키마 변경 시 프론트가 **빌드 타임에 깨져** 타입 드리프트를 차단. 수동 타입 중복 관리 제거 |
 | QR 렌더 | qrcode.react | 결과지 상세의 상담 QR(서명 딥링크의 시각화). 클라이언트 렌더 — 외부 서비스 불필요 |
-| 스타일 | CSS 변수 + CSS Modules | docs/05 토큰을 `tokens.css` 하나로. MVP에 컴포넌트 라이브러리·Tailwind는 과설계 (05 §전제) |
+| 스타일 | Tailwind CSS | docs/05 토큰을 `@theme`으로 등록해 사용 — 팔레트 밖 색상은 클래스 자체가 없어 "임의 색상 금지"(05 §5.5-1)가 구조적으로 강제됨. shadcn/ui의 전제 조건 |
+| 컴포넌트 | shadcn/ui | 예약 캘린더(Calendar), 상태 전이 확인(Dialog), 상태 뱃지(Badge) 등 필요 프리미티브를 Radix 기반 접근성과 함께. 코드가 레포에 복사되는 방식 — 런타임 의존 없이 커스텀 자유. **기본 팔레트 금지**: 설치 직후 테마 변수에 05 토큰 매핑이 선행 작업 |
+| 전역 상태 | zustand | 전역 클라이언트 상태는 인증(user·token)뿐 — Provider 중첩 없이 셀렉터 구독으로 리렌더 최소화, ~1KB. 서버 데이터는 전부 TanStack Query 소관이라 store는 auth 하나로 유지 |
 | 폼 | 제어 컴포넌트 (라이브러리 없음) | 폼이 3개(로그인·가입·QR 검증)뿐. react-hook-form은 규모 대비 과함 |
 
 ## 6.2 디렉터리 구조
@@ -22,7 +24,7 @@ frontend/src/
 │   ├── schema.d.ts        # openapi-typescript 생성물 (수정 금지, npm run codegen)
 │   └── queries/           # TanStack Query 훅 (useSlots, useMyReservations, ...)
 ├── auth/
-│   ├── AuthContext.tsx     # user + token, login/logout
+│   ├── store.ts            # zustand: user + token, login/logout
 │   ├── RequireRole.tsx     # 역할 가드 라우트 (백엔드 require_roles의 프론트 쌍)
 │   └── scopedSession.ts    # QR 스코프 토큰 (sessionStorage, 정식 토큰과 격리)
 ├── features/
@@ -30,8 +32,10 @@ frontend/src/
 │   ├── consult/           # QR 진입: 검증 → 프리셀렉트 예약 (공개 라우트)
 │   ├── counselor/         # 당일 일정(브리핑), 기록 작성(AI 구조화), 슬롯 관리
 │   └── admin/             # 대시보드 (지표 카드 + 관심 제품 순위)
-├── components/            # Badge, Card, EmptyState, Spinner 등 공용
-├── styles/tokens.css      # docs/05 컬러·타이포·간격 토큰 (임의 색상 금지)
+├── components/
+│   ├── ui/                # shadcn/ui 생성물 (badge, dialog, calendar, ...)
+│   └── ...                # EmptyState, StatusBadge 등 도메인 공용
+├── styles/tokens.css      # docs/05 토큰 → Tailwind @theme + shadcn 테마 변수 매핑
 └── App.tsx                # 라우터 + Provider 배선
 ```
 
