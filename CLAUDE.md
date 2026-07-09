@@ -19,6 +19,8 @@
 - [x] 디자인 시스템 명세 (docs/05) — 컬러 토큰·타이포·상태 뱃지 매핑
 - [x] 백엔드 골격: FastAPI 구조, SQLAlchemy 모델 11종, Alembic(제약 3종 실증), docker-compose(db 5433 + backend), 멱등 시드
 - [ ] 예약 코어: 슬롯/예약 API, 이중 예약 차단 2중 제약(슬롯 partial unique + 고객 시간겹침 GiST EXCLUDE) + 동시성 테스트
+  - [x] 인증 선행분: JWT 가입/로그인/me, get_current_user + require_roles 인가 지점 (8434dbf)
+  - [ ] 슬롯 API → 예약 생성(자동 배정 + insert-first 409) → 상태 전이 가드 → 동시성 pytest
 - [ ] QR 진입: 서명 토큰 발급/검증, 스코프 세션
 - [ ] 알림: 인앱 채널 어댑터, APScheduler 리마인더(24h/1h)
 - [ ] LLM: ① 기록 구조화(동기, structured output) ② 사전 브리핑(비동기 배치) — **키 없으면 결정론 MockProvider 폴백 필수 (NFR-10)**
@@ -36,7 +38,7 @@
 
 > 세션을 마칠 때 이 체크리스트와 아래 "직전 세션 메모"를 갱신하고 커밋할 것.
 
-**직전 세션 메모 (2026-07-09)**: 백엔드 골격 완료. `docker compose up` 원커맨드로 마이그레이션→시드→서버 기동 확인. 특이사항: ① ERD와 구현 정합화 3건은 문서 먼저 수정(예약 start_at/end_at 복제 컬럼, 브리핑 cancelled, tstzrange) ② 제약 3종을 psql 직접 INSERT 4시나리오로 실증(슬롯 unique 거부·시간겹침 EXCLUDE 거부·취소 후 재예약 허용) ③ db 호스트 포트는 5433(사용자 Mac의 brew PG16과 충돌 회피, 평가자 로컬 PG 방어 겸용). 시드 계정 비밀번호 전부 demo1234. **다음 작업: 예약 코어** (슬롯/예약 API + 상태 전이 서비스 + 동시성 테스트). 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로 설명하며 진행할 것.
+**직전 세션 메모 (2026-07-09)**: 백엔드 골격 완료 + 예약 코어 착수(인증까지). ① `docker compose up` 원커맨드로 마이그레이션→시드→서버 기동 확인, 시드 멱등 검증 ② ERD 정합화 3건은 문서 먼저 수정(예약 start_at/end_at 복제, 브리핑 cancelled, tstzrange) ③ 제약 3종을 psql 4시나리오로 실증 ④ db 호스트 포트 5433(로컬 brew PG16 충돌 회피) ⑤ JWT 인증 완료 — 가입은 customer 고정(권한 상승 차단), 로그인 실패 메시지 단일화(계정 열거 방지). 시드 계정 demo1234. **다음 작업: 슬롯 API부터** (상담사 개설/삭제 + 고객 시간대 통합 조회 → 예약 생성 → 상태 전이 → 동시성 pytest). 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로 설명. 면접 대비는 interview-notes.local.md에 세션별 누적(커밋 금지).
 
 ## 스택 및 구조
 
