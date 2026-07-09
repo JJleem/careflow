@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, require_roles
+from app.api.deps import AuthContext, get_auth_context, get_current_user, require_roles
 from app.db import get_db
 from app.models import Reservation, User, UserRole
 from app.schemas.reservation import (
@@ -35,8 +35,23 @@ def _to_response(r: Reservation) -> ReservationResponse:
 
 @router.post("/reservations", status_code=status.HTTP_201_CREATED)
 def create_reservation(
-    user: CustomerUser, db: DB, body: ReservationCreate
+    ctx: Annotated[AuthContext, Depends(get_auth_context)],
+    db: DB,
+    body: ReservationCreate,
 ) -> ReservationResponse:
+    """정식 로그인 고객 + QR 스코프 세션 모두 허용 — 단, 스코프 세션은
+    검증을 통과한 그 결과지로만 예약 가능 (NFR-7 최소 권한)."""
+    user = ctx.user
+    if user.role != UserRole.customer:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="권한이 없습니다")
+    if (
+        ctx.scoped_test_result_id is not None
+        and body.test_result_id != ctx.scoped_test_result_id
+    ):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail="QR 세션으로는 해당 결과지의 예약만 생성할 수 있습니다",
+        )
     try:
         reservation = reservation_service.create_reservation(
             db,

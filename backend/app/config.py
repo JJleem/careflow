@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     # 호스트 포트 5433 = docker-compose가 노출하는 db 포트 (로컬 PG와 충돌 회피)
     database_url: str = "postgresql+psycopg://careflow:careflow@localhost:5433/careflow"
 
-    # JWT / QR 서명 토큰. 데모용 기본값 — 실운영에서는 반드시 환경변수로 주입
-    secret_key: str = "careflow-dev-secret"
+    # JWT / QR 서명 토큰. 데모용 기본값(HS256 권장 32바이트 이상) — 실운영에서는 반드시 환경변수로 주입
+    secret_key: str = "careflow-dev-only-secret-key-change-in-production"
     access_token_expire_minutes: int = 60 * 24
     qr_token_max_age_seconds: int = 60 * 60 * 24 * 365  # 결과지 인쇄물 수명
     scoped_session_expire_minutes: int = 30  # QR 스코프 세션 짧은 TTL (NFR-7)

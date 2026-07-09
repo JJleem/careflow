@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_roles
+from app.api.deps import AuthContext, get_auth_context, require_roles
 from app.db import get_db
 from app.models import User, UserRole
 from app.schemas.slot import (
@@ -20,7 +20,6 @@ from app.services import slots as slot_service
 router = APIRouter(tags=["슬롯"])
 
 CounselorUser = Annotated[User, Depends(require_roles(UserRole.counselor))]
-CustomerUser = Annotated[User, Depends(require_roles(UserRole.customer))]
 DB = Annotated[Session, Depends(get_db)]
 
 
@@ -80,10 +79,13 @@ def delete_slot(user: CounselorUser, db: DB, slot_id: int) -> None:
 
 @router.get("/slots")
 def available_times(
-    user: CustomerUser,
+    ctx: Annotated[AuthContext, Depends(get_auth_context)],
     db: DB,
     target_date: Annotated[date, Query(alias="date")],
 ) -> AvailableTimesResponse:
+    # QR 스코프 세션도 예약 화면을 그려야 하므로 허용 (가용 시간은 민감정보 아님)
+    if ctx.user.role != UserRole.customer:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="권한이 없습니다")
     times = slot_service.list_available_times(db, target_date)
     alternatives = (
         slot_service.find_alternative_dates(db, target_date) if not times else []

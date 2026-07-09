@@ -50,3 +50,25 @@ def db(session_factory):
     s = session_factory()
     yield s
     s.close()
+
+
+@pytest.fixture
+def client(session_factory):
+    """테스트 DB로 연결된 HTTP 클라이언트 — 접근 제어처럼
+    라우터·의존성 레이어까지 검증해야 하는 테스트용."""
+    from fastapi.testclient import TestClient
+
+    from app.db import get_db
+    from app.main import app
+
+    def override():
+        s = session_factory()
+        try:
+            yield s
+        finally:
+            s.close()
+
+    app.dependency_overrides[get_db] = override
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
