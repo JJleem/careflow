@@ -12,13 +12,14 @@ from app.models.enums import (
 from app.models.notification import Notification
 from app.models.purchase import PurchaseEvent
 from app.models.record import Briefing, ConsultationRecord
-from app.models.reservation import Reservation
+from app.models.reservation import ACTIVE_STATUSES, Reservation
 from app.models.slot import AvailabilitySlot
 from app.models.test_result import TestResult
 from app.models.user import CounselorProfile, Subject, User
 from app.models.waitlist import WaitlistEntry
 
 __all__ = [
+    "ACTIVE_STATUSES",
     "Base",
     "User",
     "Subject",

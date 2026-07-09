@@ -10,6 +10,13 @@ from app.models.slot import AvailabilitySlot
 from app.models.test_result import TestResult
 from app.models.user import Subject, User
 
+# 슬롯을 점유하는 상태. cancelled만 제외 — partial unique index의 WHERE절과 동일해야 함
+ACTIVE_STATUSES = (
+    ReservationStatus.confirmed,
+    ReservationStatus.completed,
+    ReservationStatus.no_show,
+)
+
 
 class Reservation(CreatedAtMixin, Base):
     """예약. 이중 예약 차단은 앱 로직이 아닌 DB 제약으로 보장한다 (NFR-1, docs/04 §4.3-3).
