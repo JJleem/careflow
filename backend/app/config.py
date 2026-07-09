@@ -8,7 +8,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    database_url: str = "postgresql+psycopg://careflow:careflow@localhost:5432/careflow"
+    # 호스트 포트 5433 = docker-compose가 노출하는 db 포트 (로컬 PG와 충돌 회피)
+    database_url: str = "postgresql+psycopg://careflow:careflow@localhost:5433/careflow"
 
     # JWT / QR 서명 토큰. 데모용 기본값 — 실운영에서는 반드시 환경변수로 주입
     secret_key: str = "careflow-dev-secret"
