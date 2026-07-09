@@ -24,6 +24,8 @@ class Settings(BaseSettings):
 
     timezone: str = "Asia/Seoul"  # 표시·해석 타임존, 저장은 UTC (NFR-8)
 
+    scheduler_enabled: bool = True  # 테스트에서는 끔 (잡이 테스트 DB 밖을 건드리지 않도록)
+
 
 @lru_cache
 def get_settings() -> Settings:

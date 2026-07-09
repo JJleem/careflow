@@ -12,6 +12,13 @@ from app.models import Base
 TEST_DB_NAME = "careflow_test"
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _disable_scheduler():
+    """TestClient의 lifespan이 스케줄러를 띄우지 않도록 — 잡은 SessionLocal(개발 DB)을
+    쓰므로 테스트 격리가 깨진다. 스케줄러 잡 로직은 서비스 함수 단위로 직접 테스트."""
+    get_settings().scheduler_enabled = False
+
+
 @pytest.fixture(scope="session")
 def engine():
     base_url = get_settings().database_url
