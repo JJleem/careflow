@@ -2,23 +2,24 @@
 
 :root {
   /* Brand */
-  --cf-color-primary: #16B3AC;
-  --cf-color-primary-dark: #1D8D88;
-  --cf-color-primary-soft: #E8F7F6;
-  --cf-color-deep: #0E282B;
+  --cf-color-brand-mint: #22BDB8;
+  --cf-color-primary: #087D78;
+  --cf-color-primary-dark: #066A66;
+  --cf-color-primary-soft: #E9FAF8;
+  --cf-color-deep: #0B2A2B;
 
   /* Neutral */
-  --cf-color-text: #222222;
-  --cf-color-text-secondary: #8C8C8C;
-  --cf-color-border: #EEEEEE;
-  --cf-color-surface: #F4F4F4;
+  --cf-color-text: #1F2424;
+  --cf-color-text-secondary: #8A8D8E;
+  --cf-color-border: #E8ECEB;
+  --cf-color-surface: #F7F8F7;
   --cf-color-bg: #FFFFFF;
 
   /* Semantic */
-  --cf-color-success: #1D8D88;
-  --cf-color-info: #16B3AC;
-  --cf-color-warning: #E8A23D;
-  --cf-color-danger: #D64545;
+  --cf-color-success: #087D78;
+  --cf-color-info: #22BDB8;
+  --cf-color-warning: #E4A13A;
+  --cf-color-danger: #D94E4E;
 
   /* Typography */
   --cf-font-sans: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
@@ -63,6 +64,7 @@
 }
 
 @theme {
+  --color-brand-mint: var(--cf-color-brand-mint);
   --color-primary: var(--cf-color-primary);
   --color-primary-dark: var(--cf-color-primary-dark);
   --color-primary-soft: var(--cf-color-primary-soft);
