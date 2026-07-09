@@ -101,6 +101,8 @@ erDiagram
         int subject_id FK
         int test_result_id FK
         int customer_id FK
+        timestamptz start_at "슬롯에서 복제 — 고객 시간겹침 EXCLUDE 제약용"
+        timestamptz end_at "슬롯에서 복제"
         enum status "confirmed | completed | cancelled | no_show"
         text pre_question "사전 문의"
         timestamptz confirmed_at
@@ -120,7 +122,7 @@ erDiagram
     BRIEFING {
         int id PK
         int reservation_id FK UK
-        enum status "pending | processing | done | failed"
+        enum status "pending | processing | done | failed | cancelled"
         text content
         string batch_id "LLM 배치 작업 ID"
     }
@@ -163,7 +165,7 @@ erDiagram
    ```
    애플리케이션에서 "슬롯이 비었는지 확인 후 INSERT"하는 방식은 확인과 삽입 사이의 레이스를 막지 못한다. **partial unique index**를 사용하면 취소된 예약(`cancelled`)이 있는 슬롯은 재예약이 가능하면서도, 활성 예약은 슬롯당 정확히 1건임이 DB 수준에서 보장된다. 동시 요청 시 나중 트랜잭션은 유니크 위반 → 409 응답으로 변환.
 
-   슬롯 단위 차단만으로는 **한 고객이 같은 시각에 서로 다른 상담사에게 중복 예약**하는 경로가 남는다(자동 배정이라 드물지만 재시도·직접 API 호출로 가능). 이는 고객 단위 **GiST EXCLUDE 제약**(`btree_gist`, `tsrange(start_at, end_at)` 겹침 + `customer_id` 동일, 활성 상태 한정)으로 DB 수준에서 함께 차단한다. 두 제약 모두 "확인 후 삽입"이 아닌 **insert-first → 제약 위반 catch → 409** 패턴으로 처리한다.
+   슬롯 단위 차단만으로는 **한 고객이 같은 시각에 서로 다른 상담사에게 중복 예약**하는 경로가 남는다(자동 배정이라 드물지만 재시도·직접 API 호출로 가능). 이는 고객 단위 **GiST EXCLUDE 제약**(`btree_gist`, `tstzrange(start_at, end_at)` 겹침 + `customer_id` 동일, `confirmed` 한정)으로 DB 수준에서 함께 차단한다. EXCLUDE는 동일 테이블 컬럼만 참조할 수 있으므로 예약 생성 시 슬롯의 `start_at`/`end_at`을 예약 행에 복제 저장한다. 두 제약 모두 "확인 후 삽입"이 아닌 **insert-first → 제약 위반 catch → 409** 패턴으로 처리한다.
 
 4. **예약 즉시 확정(승인 단계 없음)** — 슬롯은 상담사가 스스로 개설한 시간이므로 별도 승인은 "담당자가 확인 후 재안내"라는 기존 수동 프로세스의 재생산일 뿐이다. 과제의 목적 자체가 이 개입 제거이므로 `confirmed`로 바로 생성한다.
 
@@ -363,7 +365,7 @@ sequenceDiagram
 | 상담사 측 취소 | 활성 예약이 있는 슬롯은 **삭제 불가**. 상담사 사정 취소는 예약의 `cancelled` 전이로만 가능하며, 고객 알림 + 인근 빈 슬롯 추천으로 재예약 유도 | 슬롯 삭제로 예약이 고아가 되는 경로 차단 |
 | 임박 예약의 리마인더 | 예약 생성 시점에 `scheduled_at`이 이미 과거인 리마인더는 **생성하지 않음** | 1시간 이내 임박 예약 시 "24시간 전" 알림이 즉시 발송되는 오동작 방지 |
 | 취소·노쇼 시점 가드 | 취소는 상담 시작 전까지만, `completed`/`no_show` 전이는 상담 시작 시각 이후에만 허용 | 시작 전 노쇼 처리로 인한 지표 오염 방지 |
-| 고객 중복 예약 | 동일 검사 결과당 활성 예약 1건 (partial unique index) + 동일 고객의 시간 겹침 예약 차단 (GiST EXCLUDE, §4.3-3) | 동일 결과지 다중 예약으로 슬롯 잠식 방지, 같은 시각 이중 상담 원천 차단. 다른 결과지·다른 시간 상담은 허용 |
+| 고객 중복 예약 | 동일 검사 결과당 진행 예정(`confirmed`) 예약 1건 (partial unique index) + 동일 고객의 시간 겹침 예약 차단 (GiST EXCLUDE, §4.3-3) | 동일 결과지 다중 예약으로 슬롯 잠식 방지, 같은 시각 이중 상담 원천 차단. 다른 결과지·다른 시간 상담과 완료된 결과지의 재상담은 허용 |
 | 대기 신청 만료 | 대기는 **날짜 단위**로 신청하며, 희망일 경과 시 일일 잡이 `expired` 처리 | 시간대 단위 대기는 매칭 정밀도 대비 복잡도가 큼. 알림 후 재예약은 선착순이므로 홀드 관리 불필요 |
 | 구매 웹훅 멱등성 | `order_id` unique — 동일 이벤트 재수신은 무시. 어트리뷰션 후보가 여러 건이면 **가장 최근 완료 상담 1건**에만 연결 | 웹훅 재전송은 표준 동작. 이중 집계로 전환율 부풀림 방지 |
 | 예약 취소 시 브리핑 | `pending` 브리핑은 취소 처리하고, 배치 제출 시 활성 예약 건만 포함 | 취소된 상담의 LLM 비용 낭비 차단 |
