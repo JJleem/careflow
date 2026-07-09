@@ -3,12 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api import (
+    admin,
     auth,
     consult,
     notifications,
     records,
     reservations,
     slots,
+    subjects,
     test_results,
     webhooks,
 )
@@ -43,6 +45,8 @@ app.include_router(test_results.router)
 app.include_router(notifications.router)
 app.include_router(records.router)
 app.include_router(webhooks.router)
+app.include_router(subjects.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")
