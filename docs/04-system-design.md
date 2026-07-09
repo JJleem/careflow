@@ -107,6 +107,8 @@ erDiagram
         text pre_question "사전 문의"
         timestamptz confirmed_at
         timestamptz cancelled_at
+        timestamptz completed_at
+        timestamptz no_show_at
     }
     CONSULTATION_RECORD {
         int id PK
@@ -135,6 +137,7 @@ erDiagram
     NOTIFICATION {
         int id PK
         int user_id FK
+        int reservation_id FK "nullable — 취소 시 해당 예약 리마인더만 삭제하기 위한 연결"
         enum type "confirm | cancel | reminder_24h | reminder_1h | waitlist"
         text message
         timestamptz scheduled_at
