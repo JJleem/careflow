@@ -7,10 +7,10 @@
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-import bcrypt
 from sqlalchemy import select
 
 from app.db import SessionLocal
+from app.security import hash_password
 from app.models import (
     AvailabilitySlot,
     CounselorProfile,
@@ -55,10 +55,6 @@ INDICATORS = {
          "comment": "부족 소견. 아연은 중금속 배출 효소의 보조 인자로 보충이 필요합니다."},
     ],
 }
-
-
-def hash_password(raw: str) -> str:
-    return bcrypt.hashpw(raw.encode(), bcrypt.gensalt()).decode()
 
 
 def seed() -> None:
