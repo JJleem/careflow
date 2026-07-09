@@ -20,6 +20,8 @@ class Notification(CreatedAtMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # 취소 시 이 예약의 미발송 리마인더만 정확히 삭제하기 위한 연결 (없으면 일반 알림)
+    reservation_id: Mapped[int | None] = mapped_column(ForeignKey("reservations.id"))
     type: Mapped[NotificationType] = mapped_column(
         pg_enum(NotificationType, "notification_type")
     )

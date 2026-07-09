@@ -29,6 +29,8 @@ def engine():
     eng = create_engine(test_url)
     with eng.begin() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS btree_gist"))
+    # 모델이 바뀌어도 테스트 DB가 항상 최신 스키마가 되도록 재생성
+    Base.metadata.drop_all(eng)
     Base.metadata.create_all(eng)
     yield eng
     eng.dispose()

@@ -75,7 +75,8 @@ def make_world(db, counselors=1):
     db.add_all(results + slots)
     db.commit()
     return SimpleNamespace(
-        customers=users, subjects=subjects, results=results, slots=slots
+        customers=users, counselors=counselor_users, profiles=profiles,
+        subjects=subjects, results=results, slots=slots,
     )
 
 

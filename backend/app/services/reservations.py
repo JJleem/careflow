@@ -10,12 +10,17 @@ from app.models import (
     ACTIVE_STATUSES,
     AvailabilitySlot,
     Briefing,
+    BriefingStatus,
     Notification,
     NotificationType,
     Reservation,
     ReservationStatus,
     Subject,
     TestResult,
+    User,
+    UserRole,
+    WaitlistEntry,
+    WaitlistStatus,
 )
 
 
@@ -164,6 +169,7 @@ def _create_side_effects(db: Session, r: Reservation) -> None:
     db.add(
         Notification(
             user_id=r.customer_id,
+            reservation_id=r.id,
             type=NotificationType.confirm,
             message=f"{when} 상담 예약이 확정되었습니다.",
             scheduled_at=now,
@@ -179,12 +185,133 @@ def _create_side_effects(db: Session, r: Reservation) -> None:
             db.add(
                 Notification(
                     user_id=r.customer_id,
+                    reservation_id=r.id,
                     type=ntype,
                     message=f"{label} {when} 상담이 예정되어 있습니다.",
                     scheduled_at=at,
                 )
             )
     db.add(Briefing(reservation_id=r.id))
+
+
+class ReservationNotFound(Exception):
+    pass
+
+
+class PermissionDenied(Exception):
+    pass
+
+
+class InvalidTransition(Exception):
+    def __init__(self, reason: str):
+        self.reason = reason
+
+
+def transition_reservation(
+    db: Session,
+    reservation_id: int,
+    target: ReservationStatus,
+    actor: User,
+) -> Reservation:
+    """모든 상태 전이의 유일한 통로 (docs/04 §4.4). API·스케줄러 어디서 부르든
+    인가·시점 가드·사이드이펙트가 동일하게 적용된다."""
+    r = db.get(Reservation, reservation_id)
+    if r is None:
+        raise ReservationNotFound
+
+    if actor.role == UserRole.customer:
+        if r.customer_id != actor.id:
+            raise PermissionDenied
+        if target != ReservationStatus.cancelled:
+            raise PermissionDenied  # 고객은 취소만 가능
+    elif actor.role == UserRole.counselor:
+        if r.slot.counselor.user_id != actor.id:
+            raise PermissionDenied  # 배정 상담사만
+    else:
+        raise PermissionDenied
+
+    if r.status != ReservationStatus.confirmed:
+        raise InvalidTransition(f"'{r.status}' 상태에서는 전이할 수 없습니다")
+
+    now = datetime.now(timezone.utc)
+    # 시점 가드 (§4.7): 취소=시작 전, 완료/노쇼=시작 후 — 지표 오염 방지
+    if target == ReservationStatus.cancelled and now >= r.start_at:
+        raise InvalidTransition("상담 시작 후에는 취소할 수 없습니다")
+    if target in (ReservationStatus.completed, ReservationStatus.no_show):
+        if now < r.start_at:
+            raise InvalidTransition("상담 시작 전에는 완료/노쇼 처리할 수 없습니다")
+
+    r.status = target
+    if target == ReservationStatus.cancelled:
+        r.cancelled_at = now
+        _on_cancel(db, r, by_counselor=actor.role == UserRole.counselor)
+    elif target == ReservationStatus.completed:
+        r.completed_at = now
+    elif target == ReservationStatus.no_show:
+        r.no_show_at = now
+
+    db.commit()
+    return r
+
+
+def _on_cancel(db: Session, r: Reservation, by_counselor: bool) -> None:
+    """취소의 사이드이펙트 4종 — 전이와 같은 트랜잭션 (§4.4).
+    슬롯 해제는 별도 처리 불필요: cancelled는 partial unique index에서 빠지므로
+    상태 변경 자체가 곧 슬롯 해제다."""
+    now = datetime.now(timezone.utc)
+    kst = ZoneInfo(get_settings().timezone)
+    when = r.start_at.astimezone(kst).strftime("%m월 %d일 %H:%M")
+
+    # 1. 이 예약의 미발송 리마인더 삭제
+    for n in db.scalars(
+        select(Notification).where(
+            Notification.reservation_id == r.id,
+            Notification.sent_at.is_(None),
+            Notification.type.in_(
+                (NotificationType.reminder_24h, NotificationType.reminder_1h)
+            ),
+        )
+    ):
+        db.delete(n)
+
+    # 2. pending 브리핑 취소 (LLM 비용 낭비 차단, §4.7)
+    briefing = db.scalar(select(Briefing).where(Briefing.reservation_id == r.id))
+    if briefing is not None and briefing.status == BriefingStatus.pending:
+        briefing.status = BriefingStatus.cancelled
+
+    # 3. 고객에게 취소 확인 알림 (상담사 취소면 재예약 유도)
+    message = (
+        f"상담사 사정으로 {when} 상담이 취소되었습니다. 다른 시간대로 다시 예약해 주세요."
+        if by_counselor
+        else f"{when} 상담 예약이 취소되었습니다."
+    )
+    db.add(
+        Notification(
+            user_id=r.customer_id,
+            reservation_id=r.id,
+            type=NotificationType.cancel,
+            message=message,
+            scheduled_at=now,
+        )
+    )
+
+    # 4. 해당 날짜 대기자 전원 알림 → 선착순 재예약 (§4.7)
+    cancelled_date = r.start_at.astimezone(kst).date()
+    for entry in db.scalars(
+        select(WaitlistEntry).where(
+            WaitlistEntry.desired_date == cancelled_date,
+            WaitlistEntry.status == WaitlistStatus.waiting,
+        )
+    ):
+        entry.status = WaitlistStatus.notified
+        db.add(
+            Notification(
+                user_id=entry.customer_id,
+                type=NotificationType.waitlist,
+                message=f"{cancelled_date:%m월 %d일}에 상담 자리가 생겼습니다. 지금 예약해 보세요.",
+                scheduled_at=now,
+            )
+        )
 
 
 def list_my_reservations_as_customer(

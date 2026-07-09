@@ -19,6 +19,17 @@ class ReservationCreate(BaseModel):
         return v
 
 
+class ReservationTransitionRequest(BaseModel):
+    status: ReservationStatus
+
+    @field_validator("status")
+    @classmethod
+    def not_confirmed(cls, v: ReservationStatus) -> ReservationStatus:
+        if v == ReservationStatus.confirmed:
+            raise ValueError("confirmed로는 전이할 수 없습니다 (생성 시에만 부여)")
+        return v
+
+
 class ReservationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

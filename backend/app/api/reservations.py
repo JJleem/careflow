@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_roles
 from app.db import get_db
 from app.models import Reservation, User, UserRole
-from app.schemas.reservation import ReservationCreate, ReservationResponse
+from app.schemas.reservation import (
+    ReservationCreate,
+    ReservationResponse,
+    ReservationTransitionRequest,
+)
 from app.services import reservations as reservation_service
 from app.services import slots as slot_service
 
@@ -76,6 +80,28 @@ def create_reservation(
                 ],
             },
         )
+    return _to_response(reservation)
+
+
+@router.patch("/reservations/{reservation_id}")
+def transition_reservation(
+    user: Annotated[User, Depends(get_current_user)],
+    db: DB,
+    reservation_id: int,
+    body: ReservationTransitionRequest,
+) -> ReservationResponse:
+    try:
+        reservation = reservation_service.transition_reservation(
+            db, reservation_id, body.status, actor=user
+        )
+    except reservation_service.ReservationNotFound:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="예약이 없습니다")
+    except reservation_service.PermissionDenied:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, detail="이 예약을 변경할 권한이 없습니다"
+        )
+    except reservation_service.InvalidTransition as exc:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail=exc.reason)
     return _to_response(reservation)
 
 

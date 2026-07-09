@@ -68,6 +68,8 @@ class Reservation(CreatedAtMixin, Base):
     pre_question: Mapped[str | None] = mapped_column(Text)
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    no_show_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     slot: Mapped[AvailabilitySlot] = relationship()
     subject: Mapped[Subject] = relationship()
