@@ -16,5 +16,16 @@ services:
       timeout: 3s
       retries: 10
 
+  backend:
+    build: ./backend
+    environment:
+      # 컨테이너 네트워크 안에서는 서비스명 'db'가 곧 호스트명
+      DATABASE_URL: postgresql+psycopg://careflow:careflow@db:5432/careflow
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
