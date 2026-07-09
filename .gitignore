@@ -1,2 +1,9 @@
 .DS_Store
 *.local.md
+
+# Python (backend)
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
