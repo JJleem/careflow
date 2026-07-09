@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api import auth, slots
+from app.api import auth, reservations, slots
 
 app = FastAPI(
     title="CareFlow API",
@@ -10,6 +10,7 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(slots.router)
+app.include_router(reservations.router)
 
 
 @app.get("/health")

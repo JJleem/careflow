@@ -25,3 +25,5 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# 테스트는 함수 스타일만 사용 — 모델 클래스(TestResult)가 수집되지 않도록
+python_classes = []
