@@ -18,6 +18,7 @@
 - [x] 기획·설계 문서 4종 (docs/01~04) — 설계 확정, 설계 리뷰(엣지 케이스 정책) 완료
 - [x] 디자인 시스템 명세 (docs/05) — 컬러 토큰·타이포·상태 뱃지 매핑
 - [x] 프론트엔드 설계 (docs/06) — TanStack Query·openapi-typescript 코드젠·토큰 저장 전략·라우팅 맵
+- [x] 프론트 디자인 토큰 초안 (`frontend/src/styles/tokens.css`) — docs/05 토큰 → Tailwind `@theme` + shadcn/ui 변수 매핑
 - [x] 백엔드 골격: FastAPI 구조, SQLAlchemy 모델 11종, Alembic(제약 3종 실증), docker-compose(db 5433 + backend), 멱등 시드
 - [x] 예약 코어 완료 (테스트 13종): 인증(8434dbf) → 슬롯 API(0f8e1f0) → 예약 생성+동시성 6종(e385d9a) → 상태 전이+가드 7종(9f08003)
 - [x] QR 진입: 서명 토큰 발급/검증(위변조·잠금 테스트), 스코프 세션(허용 3개 API 외 일괄 차단), 결과지 상세/QR 딥링크 API (e8d1660)
@@ -38,7 +39,7 @@
 
 > 세션을 마칠 때 이 체크리스트와 아래 "직전 세션 메모"를 갱신하고 커밋할 것.
 
-**직전 세션 메모 (2026-07-09)**: 백엔드 골격 완료 + 예약 코어 대부분 완료. ① 원커맨드 구동(마이그레이션→멱등 시드→서버), db 호스트 포트 5433(로컬 PG 충돌 회피) ② ERD 정합화 3건 문서 먼저 수정 ③ JWT 인증(가입 customer 고정, 로그인 실패 메시지 단일화) ④ 슬롯 API(30분 격자, 삭제 가드, 시간대 통합 조회) ⑤ 예약 생성(재상담 우선→부하 최소 배정, insert-first + savepoint 차순위 재시도, 알림·리마인더·브리핑 원자 생성, 만석 409에 대안 추천) ⑥ **테스트 13종 통과** (careflow_test DB, 실 PG — barrier 동시성 2종 포함) ⑦ 상태 전이 완료: 시점 가드, 취소 사이드이펙트 4종(리마인더는 notification.reservation_id로 해당 예약 것만 삭제 — ERD에 FK 추가, 문서 먼저), completed_at/no_show_at 컬럼 추가(마이그레이션 2번째). ⑧ QR 진입 완료: itsdangerous 서명 토큰(1년), 이름/전화 2요소 검증(5회 실패→10분 잠금, 인메모리 — 실운영 Redis 교체 지점), 스코프 세션은 JWT scope 클레임("consult:<tr_id>")으로 구현 — get_current_user가 스코프 토큰을 일괄 거부하고 명시 허용 3곳(결과지 조회·슬롯 조회·해당 결과지 예약)만 get_auth_context 사용. ⑨ 알림 스케줄러 완료: 채널 어댑터 뒤 발송, lifespan에서 기동(테스트는 scheduler_enabled=False로 끔 — conftest autouse), 라이브 틱 검증까지. ⑩ **백엔드 전체 완성** (테스트 39종): LLM(MockProvider 결정론 폴백 — 키 없이 전 플로우, AnthropicProvider는 tool use 스키마 강제 + Message Batches), 구매 웹훅(HMAC·멱등·30일 어트리뷰션), 피검자/관리자 지표 API. 시드 계정 demo1234. 배포는 안 함(완료 후 옵션 — 사용자와 합의). **다음 작업: 프론트엔드** (React+TS+Vite, docs/05 디자인 시스템 준수 — 임의 색상 금지. 고객: 결과지/QR/예약, 상담사: 워크스페이스, 관리자: 대시보드). 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로. 면접노트는 interview-notes.local.md 누적(커밋 금지).
+**직전 세션 메모 (2026-07-09)**: 백엔드 전체 완성 후 프론트 문서화까지 진행. ① 백엔드는 테스트 39종 통과 상태: 인증·슬롯·예약 생성/동시성·상태 전이·QR 스코프 세션·알림 스케줄러·LLM MockProvider 폴백·구매 웹훅·어트리뷰션·피검자/관리자 지표 API 완료. 시드 계정 demo1234. ② 프론트 설계 문서 `docs/06-frontend-design.md` 작성/커밋됨: TanStack Query, zustand auth store, Tailwind CSS, shadcn/ui, openapi-typescript, 라우팅 맵, JWT/localStorage와 QR/sessionStorage 분리, 409 만석 대안 UI 규칙. 최신 문서 커밋은 4f10707 이후 사용자 결정 반영 커밋 d189d34까지 확인. ③ 이번 이어받기 작업은 프론트 구현을 **디자인 토큰까지만** 진행: `frontend/src/styles/tokens.css`에 docs/05 원 토큰, Tailwind `@theme`, shadcn/ui 변수 매핑, 기본 body 스타일을 추가. 아직 Vite 프로젝트/package.json/router/API 클라이언트/codegen은 만들지 않음. ④ 다음 세션 시작점: Vite React+TS 골격 생성 → `tokens.css` import → Tailwind/shadcn 설정에서 기본 팔레트 대신 docs/05 토큰만 사용 → 라우터/Provider/API 클라이언트/codegen 순서. 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로. 면접노트는 `interview-notes.local.md` 누적(커밋 금지).
 
 ## 스택 및 구조
 

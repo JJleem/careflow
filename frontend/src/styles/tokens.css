@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand */
+  --cf-color-primary: #16B3AC;
+  --cf-color-primary-dark: #1D8D88;
+  --cf-color-primary-soft: #E8F7F6;
+  --cf-color-deep: #0E282B;
+
+  /* Neutral */
+  --cf-color-text: #222222;
+  --cf-color-text-secondary: #8C8C8C;
+  --cf-color-border: #EEEEEE;
+  --cf-color-surface: #F4F4F4;
+  --cf-color-bg: #FFFFFF;
+
+  /* Semantic */
+  --cf-color-success: #1D8D88;
+  --cf-color-info: #16B3AC;
+  --cf-color-warning: #E8A23D;
+  --cf-color-danger: #D64545;
+
+  /* Typography */
+  --cf-font-sans: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --cf-font-size-title-lg: 28px;
+  --cf-font-size-title-md: 22px;
+  --cf-font-size-title-sm: 18px;
+  --cf-font-size-body: 15px;
+  --cf-font-size-caption: 13px;
+  --cf-font-size-metric: 32px;
+
+  /* Shape */
+  --cf-radius-control: 4px;
+  --cf-radius-card: 10px;
+  --cf-radius-modal: 20px;
+  --cf-radius-pill: 100px;
+
+  /* Elevation */
+  --cf-shadow-card: 0 1px 3px rgba(0, 0, 0, .06);
+  --cf-shadow-modal: 0 8px 24px rgba(0, 0, 0, .16);
+
+  /* shadcn/ui theme variables mapped from docs/05 tokens */
+  --background: var(--cf-color-bg);
+  --foreground: var(--cf-color-text);
+  --card: var(--cf-color-bg);
+  --card-foreground: var(--cf-color-text);
+  --popover: var(--cf-color-bg);
+  --popover-foreground: var(--cf-color-text);
+  --primary: var(--cf-color-primary);
+  --primary-foreground: var(--cf-color-bg);
+  --secondary: var(--cf-color-surface);
+  --secondary-foreground: var(--cf-color-text);
+  --muted: var(--cf-color-surface);
+  --muted-foreground: var(--cf-color-text-secondary);
+  --accent: var(--cf-color-primary-soft);
+  --accent-foreground: var(--cf-color-deep);
+  --destructive: var(--cf-color-danger);
+  --destructive-foreground: var(--cf-color-bg);
+  --border: var(--cf-color-border);
+  --input: var(--cf-color-border);
+  --ring: var(--cf-color-primary);
+  --radius: var(--cf-radius-control);
+}
+
+@theme {
+  --color-primary: var(--cf-color-primary);
+  --color-primary-dark: var(--cf-color-primary-dark);
+  --color-primary-soft: var(--cf-color-primary-soft);
+  --color-deep: var(--cf-color-deep);
+
+  --color-text: var(--cf-color-text);
+  --color-text-secondary: var(--cf-color-text-secondary);
+  --color-border: var(--cf-color-border);
+  --color-surface: var(--cf-color-surface);
+  --color-bg: var(--cf-color-bg);
+
+  --color-success: var(--cf-color-success);
+  --color-info: var(--cf-color-info);
+  --color-warning: var(--cf-color-warning);
+  --color-danger: var(--cf-color-danger);
+
+  --font-sans: var(--cf-font-sans);
+
+  --text-title-lg: var(--cf-font-size-title-lg);
+  --text-title-md: var(--cf-font-size-title-md);
+  --text-title-sm: var(--cf-font-size-title-sm);
+  --text-body: var(--cf-font-size-body);
+  --text-caption: var(--cf-font-size-caption);
+  --text-metric: var(--cf-font-size-metric);
+
+  --radius-control: var(--cf-radius-control);
+  --radius-card: var(--cf-radius-card);
+  --radius-modal: var(--cf-radius-modal);
+  --radius-pill: var(--cf-radius-pill);
+
+  --shadow-card: var(--cf-shadow-card);
+  --shadow-modal: var(--cf-shadow-modal);
+}
+
+@layer base {
+  * {
+    border-color: var(--cf-color-border);
+  }
+
+  html {
+    background: var(--cf-color-bg);
+    color: var(--cf-color-text);
+    font-family: var(--cf-font-sans);
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: var(--cf-color-bg);
+    color: var(--cf-color-text);
+    font-size: var(--cf-font-size-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
