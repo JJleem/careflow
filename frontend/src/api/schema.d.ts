@@ -508,6 +508,41 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * MetricsResponse
+         * @description 관리자 지표 응답 (docs/04 §4.4). 비율은 분모 0(해당 기간 0건)이면 null —
+         *     0%(실제 0건 처리)와 '계산 불가'를 구분한다.
+         */
+        MetricsResponse: {
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            /** Total Reservations */
+            total_reservations: number;
+            /** Completed */
+            completed: number;
+            /** Cancelled */
+            cancelled: number;
+            /** No Show */
+            no_show: number;
+            /** Confirmed Upcoming */
+            confirmed_upcoming: number;
+            /** Completion Rate */
+            completion_rate: number | null;
+            /** No Show Rate */
+            no_show_rate: number | null;
+            /** Conversion Rate */
+            conversion_rate: number | null;
+            /** Top Interested Products */
+            top_interested_products: components["schemas"]["ProductCount"][];
+        };
         /** NotificationResponse */
         NotificationResponse: {
             /** Id */
@@ -528,6 +563,13 @@ export interface components {
          * @enum {string}
          */
         NotificationType: "confirm" | "cancel" | "reminder_24h" | "reminder_1h" | "waitlist";
+        /** ProductCount */
+        ProductCount: {
+            /** Product */
+            product: string;
+            /** Count */
+            count: number;
+        };
         /** PurchaseAck */
         PurchaseAck: {
             /** Order Id */
@@ -1557,9 +1599,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["MetricsResponse"];
                 };
             };
             /** @description Validation Error */
