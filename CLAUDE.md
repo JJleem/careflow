@@ -26,7 +26,8 @@
 - [x] LLM: 기록 구조화(동기, 스키마 강제) + 브리핑(배치 submit/poll 잡), 결정론 MockProvider 폴백(NFR-10), 비식별화(NFR-9) (78d93f5)
 - [x] 구매 웹훅 + 어트리뷰션: HMAC 서명, order_id 멱등, completed_at 기준 30일, 최근 1건 연결 (523fc0a)
 - [x] 피검자 API + 관리자 지표(GET /admin/metrics — 완료율/노쇼율/전환율/제품 순위) (441daa2) — **백엔드 전체 완성, 테스트 39종**
-- [ ] 프론트: 고객(결과지/QR/예약), 상담사(워크스페이스/기록/슬롯), 관리자(대시보드)
+- [x] 프론트 골격: Vite React19+TS+Tailwind v4, openapi-typescript+openapi-fetch(schema.d.ts 커밋), zustand auth/QR 스코프 세션, 라우팅 맵+역할 가드, shadcn 셋업(05 토큰 강제), 로그인/가입 동작 검증 (fb7bf50→1833bdb)
+- [ ] 프론트 화면: 고객(결과지/QR/예약), 상담사(워크스페이스/기록/슬롯), 관리자(대시보드)
 - [ ] E2E 스모크 (Playwright): golden path — QR/로그인 진입 → 예약 → 완료 처리 → 기록 → 대시보드 반영
 - [ ] README (실행 방법, 데모 시나리오, **스크린샷**, golden path 서사, 산출물 6종 매핑 표)
 
@@ -39,7 +40,7 @@
 
 > 세션을 마칠 때 이 체크리스트와 아래 "직전 세션 메모"를 갱신하고 커밋할 것.
 
-**직전 세션 메모 (2026-07-09)**: 백엔드 전체 완성 후 프론트 문서화까지 진행. ① 백엔드는 테스트 39종 통과 상태: 인증·슬롯·예약 생성/동시성·상태 전이·QR 스코프 세션·알림 스케줄러·LLM MockProvider 폴백·구매 웹훅·어트리뷰션·피검자/관리자 지표 API 완료. 시드 계정 demo1234. ② 프론트 설계 문서 `docs/06-frontend-design.md` 작성/커밋됨: TanStack Query, zustand auth store, Tailwind CSS, shadcn/ui, openapi-typescript, 라우팅 맵, JWT/localStorage와 QR/sessionStorage 분리, 409 만석 대안 UI 규칙. 최신 문서 커밋은 4f10707 이후 사용자 결정 반영 커밋 d189d34까지 확인. ③ 프론트 구현은 **디자인 토큰까지만** 진행: `frontend/src/styles/tokens.css`에 docs/05 원 토큰, Tailwind `@theme`, shadcn/ui 변수 매핑, 기본 body 스타일을 추가. ④ 추가 발견: 바이오컴은 실제 `(주)알로스타` 운영 브랜드이며 공식 사이트 `biocom.kr`는 민트/그레이 로고, `energy giver`, `민트패밀리 멤버십` 톤을 사용한다. 이에 `docs/05-design-system.md`와 `tokens.css`를 바이오컴 브랜드 민트(`#22BDB8`) + 접근성 보정 CTA 민트(`#087D78`) + 뉴트럴 그레이 기반으로 재조정. 아직 Vite 프로젝트/package.json/router/API 클라이언트/codegen은 만들지 않음. ⑤ 다음 세션 시작점: Vite React+TS 골격 생성 → `tokens.css` import → Tailwind/shadcn 설정에서 기본 팔레트 대신 docs/05 토큰만 사용 → 라우터/Provider/API 클라이언트/codegen 순서. 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로. 면접노트는 `interview-notes.local.md` 누적(커밋 금지).
+**직전 세션 메모 (2026-07-10)**: 프론트 골격 + 인증 화면 완료. ① Vite React 19+TS 5.9 골격 생성 — React 19는 라이브러리 전부 지원이라 문서 먼저 갱신(c323c11), TS는 openapi-typescript peer(`^5.x`) 충돌로 5.9 고정. Tailwind v4는 `@tailwindcss/vite` 플러그인, dev 프록시 `/api`→`:8000` rewrite. ② API 계층: `openapi-fetch` 추가 채택(문서 244c38e — 수동 래퍼는 드리프트 차단이 절반만 실현) + `schema.d.ts`는 서버 없이 `uv run python`으로 `app.openapi()` 덤프 후 생성·커밋, 재생성은 `npm run codegen`(백엔드 기동 필요). ③ auth: zustand persist(`cf.auth`/localStorage) + QR 스코프 세션(`cf.scoped`/sessionStorage) 분리, client 미들웨어가 스코프 토큰 우선 주입, 401 전역 처리(단 `/auth/*`의 401은 화면 인라인). ④ 라우팅 맵 §6.3 전체 배선 + RequireRole(미인증→login, 역할 불일치→역할 홈, `/reserve`는 스코프 세션 허용). 화면 10종은 아직 placeholder. ⑤ shadcn 셋업: button/input/label/card, CLI가 기본 팔레트 미주입 확인, 시맨틱 변수 전부 05 토큰 통과, rounded-sm/md/lg/xl→2/4/10/20px 매핑(향후 컴포넌트 자동 준수), 카드 rounded-card+shadow-card·버튼 hover=primary-dark 보정. **주의: shadcn CLI는 루트 tsconfig.json에 paths 없으면 리터럴 `@/` 폴더를 만든다(등록해둠)**. ⑥ 로그인/가입 실동작: 성공 시 역할 홈 리다이렉트, 401/409 인라인 에러. 검증 = compose 백엔드 기동 후 프록시 경유 로그인 200/오답 401, 빌드+oxlint 통과. ⑦ 다음 시작점: 사용자에게 `npm run dev` 룩 확인 받기 → 고객 화면(결과지 목록/상세+QR → 예약 캘린더, 409 만석 대안 UI) → 상담사 → 관리자 → E2E. 사용자는 프론트 개발자 — 백엔드 개념은 프론트 비유로. 면접노트는 `interview-notes.local.md` 누적(커밋 금지).
 
 ## 스택 및 구조
 
