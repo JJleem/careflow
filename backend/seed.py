@@ -1,9 +1,16 @@
-"""데모 시드 — 3역할 계정, 피검자, 결과지 3종, 상담 슬롯.
+"""데모 시드 — 3역할 계정, 피검자, 결과지, 상담 슬롯, 과거 상담 이력, 오늘 예약.
 
 멱등: 이미 시드된 DB에서는 아무것도 하지 않으므로 컨테이너 재시작에 안전하다.
-슬롯은 실행일 기준 다음 14일의 평일에 생성되어 언제 실행해도 데모가 성립한다.
+슬롯은 실행일 기준으로 상대 생성되어 언제 실행해도 데모가 성립한다.
+
+검사 스펙은 실제 바이오컴 공개 서비스 기준:
+- 종합 대사기능 분석: 소변 유기산(Organic Acids) 검사, mmol/mol creatinine 단위
+- 음식물 과민증 분석: 혈액 IgG 반응 등급(0~4)
+- 영양 중금속 분석: 모발 미네랄·중금속, µg/g 단위
+회사명은 노출하지 않되(시나리오는 CareFlow로 추상화) 검사 도메인의 리얼리티만 반영한다.
 """
 
+import random
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
@@ -13,7 +20,13 @@ from app.db import SessionLocal
 from app.security import hash_password
 from app.models import (
     AvailabilitySlot,
+    Briefing,
+    BriefingStatus,
+    ConsultationRecord,
     CounselorProfile,
+    DraftSource,
+    Reservation,
+    ReservationStatus,
     ServiceType,
     Subject,
     SubjectRelation,
@@ -29,32 +42,80 @@ SLOT_HOURS = (10, 11, 14, 15, 16)
 SLOT_MINUTES = 30
 SEED_DAYS = 14
 
+# 서비스별 표시명·검사법은 프론트 lib/labels.ts와 동기화할 것 (SERVICE_TYPE_LABEL / SERVICE_METHOD)
 INDICATORS = {
+    # 소변 유기산 검사 — 6개 대사 영역을 대표 마커 하나씩. range는 프론트 파서 호환("a~b"/"x 미만"/"x 이상")
     ServiceType.comprehensive_metabolic: [
-        {"name": "공복혈당", "value": 104, "unit": "mg/dL", "range": "70~99",
-         "comment": "경계 수준입니다. 정제 탄수화물 섭취를 줄이고 식후 가벼운 활동을 권장합니다."},
-        {"name": "HDL 콜레스테롤", "value": 42, "unit": "mg/dL", "range": "60 이상",
-         "comment": "다소 낮습니다. 오메가3 지방산과 유산소 운동이 개선에 도움이 됩니다."},
-        {"name": "호모시스테인", "value": 13.8, "unit": "µmol/L", "range": "5~12",
-         "comment": "상승 소견. 엽산·비타민 B12 보충을 고려해 보세요."},
+        {"name": "구연산 (에너지 생성)", "value": 210, "unit": "mmol/mol Cr", "range": "150~600",
+         "comment": "TCA 회로가 원활합니다. 현재 에너지 대사 컨디션을 유지해 주세요."},
+        {"name": "8-OHdG (항산화)", "value": 6.4, "unit": "ng/mg Cr", "range": "5.0 미만",
+         "comment": "산화 스트레스 상승 소견. 항산화 식품(베리류·녹색 채소)과 오메가3를 권장합니다."},
+        {"name": "퀴놀린산 (정신건강·집중력)", "value": 3.7, "unit": "mmol/mol Cr", "range": "3.0 미만",
+         "comment": "신경 흥분성 대사물이 다소 높습니다. 마그네슘 보충과 수면 관리가 도움이 됩니다."},
+        {"name": "아라비노스 (장 건강)", "value": 38, "unit": "mmol/mol Cr", "range": "50 미만",
+         "comment": "장내 효모 대사 지표는 정상 범위입니다."},
     ],
+    # 혈액 IgG 음식물 과민증 — 한국인 식품 패널, 0~4 반응 등급
     ServiceType.food_intolerance: [
-        {"name": "우유(카제인)", "value": 3.2, "unit": "등급(0~4)", "range": "0~1",
+        {"name": "우유 (카제인)", "value": 3.2, "unit": "등급(0~4)", "range": "0~1",
          "comment": "높은 반응. 4주 제거 후 재도입 테스트를 권장합니다."},
-        {"name": "밀(글루텐)", "value": 2.1, "unit": "등급(0~4)", "range": "0~1",
+        {"name": "밀 (글루텐)", "value": 2.1, "unit": "등급(0~4)", "range": "0~1",
          "comment": "중등도 반응. 섭취 빈도를 줄이고 증상 일지를 작성해 보세요."},
         {"name": "달걀 흰자", "value": 0.4, "unit": "등급(0~4)", "range": "0~1",
          "comment": "정상 범위입니다."},
+        {"name": "대두", "value": 1.6, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "경계 반응. 발효 대두식품(된장·청국장) 위주로 소량 섭취를 권장합니다."},
     ],
+    # 모발 미네랄·중금속 — µg/g. 중금속은 상한, 영양 미네랄은 하한 기준
     ServiceType.heavy_metal: [
-        {"name": "수은(Hg)", "value": 1.9, "unit": "µg/g", "range": "1.0 미만",
+        {"name": "수은 (Hg)", "value": 1.9, "unit": "µg/g", "range": "1.0 미만",
          "comment": "기준 초과. 대형 어류 섭취를 줄이고 셀레늄이 풍부한 식품을 권장합니다."},
-        {"name": "납(Pb)", "value": 0.6, "unit": "µg/g", "range": "1.0 미만",
+        {"name": "납 (Pb)", "value": 0.6, "unit": "µg/g", "range": "1.0 미만",
          "comment": "정상 범위입니다."},
-        {"name": "아연(Zn)", "value": 58, "unit": "µg/g", "range": "70~120",
+        {"name": "아연 (Zn)", "value": 58, "unit": "µg/g", "range": "70~120",
          "comment": "부족 소견. 아연은 중금속 배출 효소의 보조 인자로 보충이 필요합니다."},
+        {"name": "마그네슘 (Mg)", "value": 22, "unit": "µg/g", "range": "30~80",
+         "comment": "부족 소견. 근육 이완·수면에 관여하는 미네랄로 견과류·통곡물 섭취를 권장합니다."},
     ],
 }
+
+# 과거 상담 이력 — 관리자 지표(완료율·노쇼율·전환율·관심 제품 순위)가 실감나도록 분포를 심는다.
+# (days_ago, status, 관심 제품, 구매 연결, 상담사idx)
+PAST_CONSULTS = [
+    (25, "completed", ["오메가3", "비타민D"], True, 0),
+    (22, "completed", ["프로바이오틱스", "오메가3"], True, 0),
+    (18, "completed", ["마그네슘"], False, 1),
+    (14, "completed", ["오메가3", "프로바이오틱스", "비타민D"], True, 0),
+    (11, "completed", ["밀크씨슬"], False, 1),
+    (8, "completed", ["오메가3", "마그네슘"], True, 1),
+    (6, "no_show", [], False, 0),
+    (3, "cancelled", [], False, 1),
+]
+
+PRODUCT_RECS = {
+    "오메가3": "오메가3 1일 1000mg, 식후 복용",
+    "비타민D": "비타민D 2000IU, 아침 식후",
+    "프로바이오틱스": "프로바이오틱스 100억 CFU, 공복",
+    "마그네슘": "마그네슘 300mg, 취침 전",
+    "밀크씨슬": "밀크씨슬 실리마린 130mg, 식후",
+}
+
+
+def _record_for(products: list[str], purchase_linked: bool) -> ConsultationRecord:
+    recs = [PRODUCT_RECS[p] for p in products if p in PRODUCT_RECS]
+    summary = (
+        "검사 지표를 함께 확인하고 생활습관·영양 보충 방향을 안내함. "
+        + ("관심 제품 구매 의사를 확인함." if purchase_linked else "제품은 추후 검토하기로 함.")
+    )
+    return ConsultationRecord(
+        raw_memo="(데모) 상담 메모 원문",
+        summary=summary,
+        interested_products=products,
+        recommendations=recs,
+        follow_up="4주 뒤 재검 권유" if products else "특이사항 없음",
+        purchase_linked=purchase_linked,
+        draft_source=DraftSource.manual,
+    )
 
 
 def seed() -> None:
@@ -91,19 +152,30 @@ def seed() -> None:
         db.flush()
 
         today = datetime.now(KST).date()
-        results = [
-            TestResult(subject_id=s1.id, service_type=ServiceType.comprehensive_metabolic,
-                       reported_at=today - timedelta(days=3),
-                       indicators=INDICATORS[ServiceType.comprehensive_metabolic]),
-            TestResult(subject_id=s2.id, service_type=ServiceType.heavy_metal,
-                       reported_at=today - timedelta(days=7),
-                       indicators=INDICATORS[ServiceType.heavy_metal]),
-            TestResult(subject_id=s3.id, service_type=ServiceType.food_intolerance,
-                       reported_at=today - timedelta(days=1),
-                       indicators=INDICATORS[ServiceType.food_intolerance]),
-        ]
-        db.add_all(results)
+        tr_metabolic = TestResult(
+            subject_id=s1.id, service_type=ServiceType.comprehensive_metabolic,
+            reported_at=today - timedelta(days=3),
+            indicators=INDICATORS[ServiceType.comprehensive_metabolic])
+        tr_metal = TestResult(
+            subject_id=s2.id, service_type=ServiceType.heavy_metal,
+            reported_at=today - timedelta(days=7),
+            indicators=INDICATORS[ServiceType.heavy_metal])
+        tr_food = TestResult(
+            subject_id=s3.id, service_type=ServiceType.food_intolerance,
+            reported_at=today - timedelta(days=1),
+            indicators=INDICATORS[ServiceType.food_intolerance])
+        db.add_all([tr_metabolic, tr_metal, tr_food])
+        db.flush()
 
+        # 상담사별 (customer, subject, test_result) 조합 — 과거/오늘 예약이 참조
+        cp_list = (cp1, cp2)
+        booking_ctx = [
+            (cu1, s1, tr_metabolic),
+            (cu1, s2, tr_metal),
+            (cu2, s3, tr_food),
+        ]
+
+        # 1) 미래 상담 슬롯 (예약 화면 데모) — 다음 14일 평일
         slots = []
         for offset in range(1, SEED_DAYS + 1):
             day = today + timedelta(days=offset)
@@ -111,16 +183,73 @@ def seed() -> None:
                 continue
             for hour in SLOT_HOURS:
                 start = datetime.combine(day, time(hour), tzinfo=KST)
-                for cp in (cp1, cp2):
+                for cp in cp_list:
                     slots.append(AvailabilitySlot(
-                        counselor_id=cp.id,
-                        start_at=start,
-                        end_at=start + timedelta(minutes=SLOT_MINUTES),
-                    ))
+                        counselor_id=cp.id, start_at=start,
+                        end_at=start + timedelta(minutes=SLOT_MINUTES)))
         db.add_all(slots)
 
+        # 2) 과거 상담 이력 — 각 상담마다 과거 슬롯 1개 + 예약 + (완료 시) 기록
+        rng = random.Random(42)
+        records = []
+        for i, (days_ago, status, products, purchased, cp_idx) in enumerate(PAST_CONSULTS):
+            cp = cp_list[cp_idx]
+            customer, subject, tr = booking_ctx[i % len(booking_ctx)]
+            start = datetime.combine(
+                today - timedelta(days=days_ago), time(rng.choice(SLOT_HOURS)), tzinfo=KST)
+            end = start + timedelta(minutes=SLOT_MINUTES)
+            slot = AvailabilitySlot(counselor_id=cp.id, start_at=start, end_at=end)
+            db.add(slot)
+            db.flush()
+            r = Reservation(
+                slot_id=slot.id, subject_id=subject.id, test_result_id=tr.id,
+                customer_id=customer.id, start_at=start, end_at=end,
+                status=ReservationStatus[status], confirmed_at=start - timedelta(days=1))
+            if status == "completed":
+                r.completed_at = end
+            elif status == "no_show":
+                r.no_show_at = end
+            elif status == "cancelled":
+                r.cancelled_at = start - timedelta(hours=3)
+            db.add(r)
+            db.flush()
+            if status == "completed":
+                rec = _record_for(products, purchased)
+                rec.reservation_id = r.id
+                records.append(rec)
+        db.add_all(records)
+
+        # 3) 오늘 확정 예약 1건 + 완료된 AI 브리핑 — 상담사 '오늘 일정' 데모.
+        #    오늘 남은 오후 시각을 쓰되, 현재보다 뒤로 두어 완료/노쇼 처리 전 상태를 보인다.
+        now = datetime.now(KST)
+        today_hour = 16 if now.hour < 16 else now.hour + 1
+        t_start = datetime.combine(today, time(today_hour), tzinfo=KST)
+        t_slot = AvailabilitySlot(
+            counselor_id=cp1.id, start_at=t_start,
+            end_at=t_start + timedelta(minutes=SLOT_MINUTES))
+        db.add(t_slot)
+        db.flush()
+        today_res = Reservation(
+            slot_id=t_slot.id, subject_id=s1.id, test_result_id=tr_metabolic.id,
+            customer_id=cu1.id, start_at=t_slot.start_at, end_at=t_slot.end_at,
+            status=ReservationStatus.confirmed, confirmed_at=now,
+            pre_question="산화 스트레스 지표가 높게 나왔는데 어떤 영양제가 도움이 될까요?")
+        db.add(today_res)
+        db.flush()
+        db.add(Briefing(
+            reservation_id=today_res.id, status=BriefingStatus.done,
+            content=(
+                "[사전 브리핑] 종합 대사기능(유기산) 결과 상담\n"
+                "- 8-OHdG 6.4 ng/mg Cr (참고 5.0 미만) — 산화 스트레스 상승, 항산화 보충 안내 권장\n"
+                "- 퀴놀린산 3.7 (참고 3.0 미만) — 마그네슘·수면 관리\n"
+                "- 구연산·아라비노스는 정상 범위\n"
+                "고객 사전 문의: \"산화 스트레스 지표가 높은데 어떤 영양제가 도움이 될까요?\" — 이 주제를 우선 다루세요."
+            )))
+
         db.commit()
-        print(f"seed: 계정 5, 피검자 3, 결과지 {len(results)}, 슬롯 {len(slots)} 생성 완료")
+        print(
+            f"seed: 계정 5, 피검자 3, 결과지 3, 슬롯 {len(slots)}, "
+            f"과거 상담 {len(PAST_CONSULTS)}(기록 {len(records)}), 오늘 예약 1(브리핑 포함) 생성 완료")
 
 
 if __name__ == "__main__":

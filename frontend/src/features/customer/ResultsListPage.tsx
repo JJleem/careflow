@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useSubjects, useSubjectResults } from '../../api/queries/results'
-import { SERVICE_TYPE_LABEL, RELATION_LABEL } from '../../lib/labels'
+import { SERVICE_TYPE_LABEL, SERVICE_METHOD, RELATION_LABEL } from '../../lib/labels'
 import { formatDateOnly } from '../../lib/datetime'
 import EmptyState from '../../components/EmptyState'
 import ErrorState from '../../components/ErrorState'
@@ -43,7 +43,12 @@ export default function ResultsListPage() {
                 className="flex items-center gap-4 rounded-card bg-card p-5 shadow-card transition-transform active:scale-[0.99]"
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="font-bold">{SERVICE_TYPE_LABEL[result.service_type]}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="font-bold">{SERVICE_TYPE_LABEL[result.service_type]}</span>
+                    <span className="rounded-pill bg-surface px-2 py-0.5 text-caption text-text-secondary">
+                      {SERVICE_METHOD[result.service_type]}
+                    </span>
+                  </span>
                   <span className="text-caption text-text-secondary">
                     {subject.name} ({RELATION_LABEL[subject.relation]}) ·{' '}
                     {formatDateOnly(result.reported_at)} 발행

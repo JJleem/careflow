@@ -4,11 +4,19 @@ type ServiceType = components['schemas']['ServiceType']
 type SubjectRelation = components['schemas']['SubjectRelation']
 type NotificationType = components['schemas']['NotificationType']
 
-// 백엔드는 enum 코드만 주고 표시용 한글명은 프론트가 매핑한다 (schema ServiceType 주석)
+// 백엔드는 enum 코드만 주고 표시용 한글명은 프론트가 매핑한다 (schema ServiceType 주석).
+// 명칭·검사법은 seed.py의 INDICATORS 스펙과 동기화 (실제 바이오컴 공개 서비스 기준)
 export const SERVICE_TYPE_LABEL: Record<ServiceType, string> = {
-  comprehensive_metabolic: '종합 대사체 분석',
-  food_intolerance: '음식물 과민반응 검사',
-  heavy_metal: '중금속 검사',
+  comprehensive_metabolic: '종합 대사기능 분석',
+  food_intolerance: '음식물 과민증 분석',
+  heavy_metal: '영양 중금속 분석',
+}
+
+// 검사 시료 — 결과지에서 검사 방식을 한 줄로 보여주는 도메인 리얼리티
+export const SERVICE_METHOD: Record<ServiceType, string> = {
+  comprehensive_metabolic: '소변 · 유기산 검사',
+  food_intolerance: '혈액 · IgG 반응',
+  heavy_metal: '모발 · 미네랄/중금속',
 }
 
 export const RELATION_LABEL: Record<SubjectRelation, string> = {

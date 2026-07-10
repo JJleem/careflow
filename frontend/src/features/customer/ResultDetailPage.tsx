@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useConsultToken, useSubjects, useTestResult } from '../../api/queries/results'
-import { SERVICE_TYPE_LABEL, isOutOfRange } from '../../lib/labels'
+import { SERVICE_TYPE_LABEL, SERVICE_METHOD, isOutOfRange } from '../../lib/labels'
 import { formatDateOnly } from '../../lib/datetime'
 import ErrorState from '../../components/ErrorState'
 import { Button } from '@/components/ui/button'
@@ -54,7 +54,9 @@ export default function ResultDetailPage() {
         <h1 className="text-title-md text-white">
           {subject ? `${subject.name}님의 검사 결과` : '검사 결과'}
         </h1>
-        <p className="text-caption text-white/60">{formatDateOnly(data.reported_at)} 발행</p>
+        <p className="text-caption text-white/60">
+          {SERVICE_METHOD[data.service_type]} · {formatDateOnly(data.reported_at)} 발행
+        </p>
       </section>
 
       <section className="flex flex-col gap-3" aria-label="검사 지표">
