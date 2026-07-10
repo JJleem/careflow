@@ -77,11 +77,14 @@ export default function SlotsPage() {
           {HOURS.map((hhmm) => {
             const slot = daySlots.get(hhmm)
             const reserved = slot?.has_active_reservation
+            // 지난 시각은 슬롯을 열 수 없다(백엔드가 과거 시각 거부) — 비활성 처리
+            const past = new Date(`${date}T${hhmm}:00+09:00`).getTime() <= Date.now()
+            const locked = reserved || (past && !slot)
             return (
               <button
                 key={hhmm}
                 type="button"
-                disabled={reserved || createSlot.isPending || deleteSlot.isPending}
+                disabled={locked || createSlot.isPending || deleteSlot.isPending}
                 onClick={() => {
                   createSlot.reset()
                   deleteSlot.reset()
@@ -89,7 +92,7 @@ export default function SlotsPage() {
                   else createSlot.mutate(`${date}T${hhmm}:00+09:00`)
                 }}
                 className={cn(
-                  'flex flex-col items-center rounded-control py-2.5 transition-colors',
+                  'flex flex-col items-center rounded-control py-2.5 transition-colors disabled:opacity-60',
                   reserved
                     ? 'bg-primary-soft text-primary'
                     : slot
@@ -99,7 +102,7 @@ export default function SlotsPage() {
               >
                 <span className="text-body font-semibold tabular-nums">{hhmm}</span>
                 <span className={cn('text-caption', slot && !reserved ? 'text-white/70' : '')}>
-                  {reserved ? '예약됨' : slot ? '열림' : '닫힘'}
+                  {reserved ? '예약됨' : slot ? '열림' : past ? '지난 시간' : '닫힘'}
                 </span>
               </button>
             )

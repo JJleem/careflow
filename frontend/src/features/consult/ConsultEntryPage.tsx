@@ -45,8 +45,8 @@ export default function ConsultEntryPage() {
       <Card className="w-full max-w-sm gap-7 py-8">
         {invalid ? (
           <CardContent className="flex flex-col items-center gap-3 text-center">
-            <CardTitle className="text-title-md font-bold tracking-[-0.02em]">
-              QR 코드를 확인할 수 없어요
+            <CardTitle asChild className="text-title-md font-bold tracking-[-0.02em]">
+              <h1>QR 코드를 확인할 수 없어요</h1>
             </CardTitle>
             <CardDescription>
               유효 기간이 지났거나 손상된 링크예요. 결과지의 QR을 다시 스캔하거나, 로그인해서
@@ -64,8 +64,8 @@ export default function ConsultEntryPage() {
           <>
             <CardHeader className="gap-1.5">
               <p className="text-caption font-bold text-primary">CareFlow</p>
-              <CardTitle className="text-title-md font-bold tracking-[-0.02em]">
-                본인확인이 필요해요
+              <CardTitle asChild className="text-title-md font-bold tracking-[-0.02em]">
+                <h1>본인확인이 필요해요</h1>
               </CardTitle>
               <CardDescription>
                 {info.data.subject_name_masked}님의 {SERVICE_TYPE_LABEL[info.data.service_type]} (

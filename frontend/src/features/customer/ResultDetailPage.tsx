@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useConsultToken, useSubjects, useTestResult } from '../../api/queries/results'
 import { SERVICE_TYPE_LABEL, SERVICE_METHOD, isOutOfRange } from '../../lib/labels'
@@ -19,7 +19,6 @@ interface Indicator {
 export default function ResultDetailPage() {
   const { id } = useParams()
   const testResultId = Number(id)
-  const navigate = useNavigate()
   const result = useTestResult(testResultId)
   const subjects = useSubjects()
   const qr = useConsultToken(testResultId)
@@ -95,11 +94,10 @@ export default function ResultDetailPage() {
         })}
       </section>
 
-      <Button
-        className="w-full"
-        onClick={() => navigate(`/reserve?result=${data.id}&subject=${data.subject_id}`)}
-      >
-        이 결과로 상담 예약하기
+      <Button asChild className="w-full">
+        <Link to={`/reserve?result=${data.id}&subject=${data.subject_id}`}>
+          이 결과로 상담 예약하기
+        </Link>
       </Button>
 
       {/* 실물 결과지의 QR과 동일한 서명 토큰 — 가족 등 결과지를 받은 사람이 스캔해 바로 예약 (docs/04 §4.7) */}

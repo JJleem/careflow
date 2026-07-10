@@ -40,8 +40,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm gap-7 py-8">
         <CardHeader className="gap-1.5">
           <p className="text-caption font-bold text-primary">CareFlow</p>
-          <CardTitle className="text-title-md font-bold tracking-[-0.02em]">
-            다시 만나서 반가워요
+          <CardTitle asChild className="text-title-md font-bold tracking-[-0.02em]">
+            <h1>다시 만나서 반가워요</h1>
           </CardTitle>
           <CardDescription>검사 결과 확인부터 상담 예약까지, 로그인하고 시작하세요</CardDescription>
         </CardHeader>
