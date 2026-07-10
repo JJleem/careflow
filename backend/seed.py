@@ -195,8 +195,11 @@ def seed() -> None:
         for i, (days_ago, status, products, purchased, cp_idx) in enumerate(PAST_CONSULTS):
             cp = cp_list[cp_idx]
             customer, subject, tr = booking_ctx[i % len(booking_ctx)]
-            start = datetime.combine(
-                today - timedelta(days=days_ago), time(rng.choice(SLOT_HOURS)), tzinfo=KST)
+            # 상담은 평일에만 운영 — 주말에 걸리면 직전 평일로 당긴다 (미래 슬롯 생성 규칙과 일치)
+            day = today - timedelta(days=days_ago)
+            while day.weekday() >= 5:
+                day -= timedelta(days=1)
+            start = datetime.combine(day, time(rng.choice(SLOT_HOURS)), tzinfo=KST)
             end = start + timedelta(minutes=SLOT_MINUTES)
             slot = AvailabilitySlot(counselor_id=cp.id, start_at=start, end_at=end)
             db.add(slot)

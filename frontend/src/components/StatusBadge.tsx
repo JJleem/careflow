@@ -12,14 +12,23 @@ const STATUS_META: Record<ReservationStatus, { label: string; className: string 
   cancelled: { label: '취소됨', className: 'bg-muted text-muted-foreground' },
 }
 
+// "노쇼"는 운영자 내부 용어 — 고객 화면에서는 낙인 없이 중립적으로 표현한다.
+// (상담사·관리자 화면은 지표 용어 그대로 유지)
+const CUSTOMER_LABEL: Partial<Record<ReservationStatus, string>> = {
+  no_show: '상담 미진행',
+}
+
 export default function StatusBadge({
   status,
+  audience = 'staff',
   className,
 }: {
   status: ReservationStatus
+  audience?: 'staff' | 'customer'
   className?: string
 }) {
   const meta = STATUS_META[status]
+  const label = (audience === 'customer' && CUSTOMER_LABEL[status]) || meta.label
   return (
     <span
       className={cn(
@@ -28,7 +37,7 @@ export default function StatusBadge({
         className,
       )}
     >
-      {meta.label}
+      {label}
     </span>
   )
 }

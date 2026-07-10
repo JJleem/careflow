@@ -65,7 +65,7 @@ export default function MyReservationsPage() {
           {upcoming.map((r) => (
             <article key={r.id} className="flex flex-col gap-3 rounded-card bg-card p-5 shadow-card">
               <div className="flex items-center justify-between">
-                <StatusBadge status={r.status} />
+                <StatusBadge status={r.status} audience="customer" />
                 <button
                   type="button"
                   onClick={() => {
@@ -97,14 +97,27 @@ export default function MyReservationsPage() {
         <section className="flex flex-col gap-3" aria-label="지난 내역">
           <h2 className="text-caption font-semibold text-text-secondary">지난 내역</h2>
           {past.map((r) => (
-            <article key={r.id} className="flex items-center gap-3 rounded-card bg-card p-5 shadow-card">
-              <div className="flex flex-1 flex-col gap-0.5">
-                <p className="font-semibold tabular-nums">
-                  {formatDate(r.start_at)} {formatTime(r.start_at)}
-                </p>
-                <p className="text-caption text-text-secondary">{r.counselor_name} 상담사</p>
+            <article key={r.id} className="flex flex-col gap-3 rounded-card bg-card p-5 shadow-card">
+              <div className="flex items-center gap-3">
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <p className="font-semibold tabular-nums">
+                    {formatDate(r.start_at)} {formatTime(r.start_at)}
+                  </p>
+                  <p className="text-caption text-text-secondary">{r.counselor_name} 상담사</p>
+                </div>
+                <StatusBadge status={r.status} audience="customer" />
               </div>
-              <StatusBadge status={r.status} />
+              {/* 미진행(노쇼) 상담은 재예약으로 유도 — 이탈 방지(P3) 접점 */}
+              {r.status === 'no_show' && (
+                <div className="flex items-center justify-between gap-3 rounded-chip bg-surface px-3 py-2.5">
+                  <span className="text-caption text-text-secondary">상담이 진행되지 못했어요</span>
+                  <Button asChild size="sm">
+                    <Link to={`/reserve?result=${r.test_result_id}&subject=${r.subject_id}`}>
+                      다시 예약하기
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </article>
           ))}
         </section>
