@@ -27,5 +27,13 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    # 브라우저 진입점 — nginx가 정적 파일 서빙 + /api를 backend로 프록시
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
