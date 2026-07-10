@@ -4,7 +4,7 @@
 
 | 계층 | 선택 | 근거 |
 |------|------|------|
-| Frontend | React 18 + TypeScript + Vite | 과제 요구사항(React). TS로 API 계약 타입 안전성 확보 |
+| Frontend | React 19 + TypeScript + Vite | 과제 요구사항(React). TS로 API 계약 타입 안전성 확보 |
 | Backend | FastAPI (Python 3.12) | 과제 요구사항 중 택1. LLM 생태계(공식 SDK, structured output)가 Python 중심이고, 비동기 I/O(예약 API + LLM 호출 + 스케줄러)를 단일 런타임에서 처리 가능 |
 | ORM / DB | SQLAlchemy 2.0 + **PostgreSQL** | 이중 예약 차단에 필요한 **partial unique index**, 상태 enum, JSONB(결과지 지표) 지원. 개발 편의를 위해 SQLite가 아닌 실제 운영 DB로 처음부터 검증 |
 | 마이그레이션 | Alembic | 스키마 변경 이력 추적 (NFR-5의 연장) |

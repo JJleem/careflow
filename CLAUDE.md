@@ -44,7 +44,7 @@
 ## 스택 및 구조
 
 - Backend: FastAPI (Python 3.12) + SQLAlchemy 2.0 + PostgreSQL + Alembic + APScheduler
-- Frontend: React 18 + TypeScript + Vite
+- Frontend: React 19 + TypeScript + Vite
 - LLM: Anthropic API (`LLMProvider` 어댑터 뒤에 추상화), 브리핑은 Message Batches
 - 실행: docker-compose (db + backend + frontend), 시드 포함 원커맨드 목표 (NFR-6)
 - 디렉터리 계획은 `docs/04-system-design.md` §4.9 참조
