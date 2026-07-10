@@ -9,6 +9,7 @@ React 19 + TypeScript + Vite. 시각 규칙은 `05-design-system.md`, 화면 목
 | 라우팅 | react-router-dom | 표준. 역할별 레이아웃 라우트 + 가드 |
 | 서버 상태 | TanStack Query | 이 앱 상태의 대부분이 서버 데이터의 캐시(슬롯·예약·알림·지표). 캐싱·재검증·로딩/에러 상태를 선언적으로. **Redux류 미도입** — 전역 클라이언트 상태는 인증뿐이라 Context 하나로 충분 |
 | API 타입 | openapi-typescript | FastAPI의 `/openapi.json` → TS 타입 자동 생성. 백엔드 스키마 변경 시 프론트가 **빌드 타임에 깨져** 타입 드리프트를 차단. 수동 타입 중복 관리 제거 |
+| API 클라이언트 | openapi-fetch | openapi-typescript의 공식 런타임 짝(~2KB). 생성 타입을 경로→파라미터→응답까지 자동 연결 — 수동 fetch 래퍼는 타입을 손으로 이어붙여야 해서 codegen의 드리프트 차단이 절반만 실현됨. 토큰 주입·401 공통 처리는 미들웨어로 |
 | QR 렌더 | qrcode.react | 결과지 상세의 상담 QR(서명 딥링크의 시각화). 클라이언트 렌더 — 외부 서비스 불필요 |
 | 스타일 | Tailwind CSS | docs/05 토큰을 `@theme`으로 등록해 사용 — 팔레트 밖 색상은 클래스 자체가 없어 "임의 색상 금지"(05 §5.5-1)가 구조적으로 강제됨. shadcn/ui의 전제 조건 |
 | 컴포넌트 | shadcn/ui | 예약 캘린더(Calendar), 상태 전이 확인(Dialog), 상태 뱃지(Badge) 등 필요 프리미티브를 Radix 기반 접근성과 함께. 코드가 레포에 복사되는 방식 — 런타임 의존 없이 커스텀 자유. **기본 팔레트 금지**: 설치 직후 테마 변수에 05 토큰 매핑이 선행 작업 |
@@ -20,7 +21,7 @@ React 19 + TypeScript + Vite. 시각 규칙은 `05-design-system.md`, 화면 목
 ```
 frontend/src/
 ├── api/
-│   ├── client.ts          # fetch 래퍼: baseURL, 토큰 주입, 401/403 공통 처리
+│   ├── client.ts          # openapi-fetch 클라이언트: baseURL, 토큰 주입, 401/403 공통 처리
 │   ├── schema.d.ts        # openapi-typescript 생성물 (수정 금지, npm run codegen)
 │   └── queries/           # TanStack Query 훅 (useSlots, useMyReservations, ...)
 ├── auth/
