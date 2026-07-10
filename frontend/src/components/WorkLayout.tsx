@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../auth/store'
+import Logo from './Logo'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -17,8 +18,8 @@ export default function WorkLayout() {
     <div className="min-h-screen bg-surface">
       <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-5 px-4">
-          <Link to="/work/today" className="text-title-sm font-extrabold tracking-[-0.02em] text-primary">
-            CareFlow
+          <Link to="/work/today">
+            <Logo />
           </Link>
           <span className="rounded-pill bg-surface px-2 py-0.5 text-caption font-semibold text-text-secondary">
             상담사

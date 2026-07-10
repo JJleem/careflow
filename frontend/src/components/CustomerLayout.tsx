@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../auth/store'
 import { getScopedSession, clearScopedSession } from '../auth/scopedSession'
 import { useNotifications } from '../api/queries/notifications'
+import Logo from './Logo'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -24,8 +25,8 @@ export default function CustomerLayout() {
     <div className="min-h-screen bg-surface">
       <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-xl items-center gap-5 px-4">
-          <Link to={user ? '/results' : '/login'} className="text-title-sm font-extrabold tracking-[-0.02em] text-primary">
-            CareFlow
+          <Link to={user ? '/results' : '/login'}>
+            <Logo />
           </Link>
           {user && (
             <>

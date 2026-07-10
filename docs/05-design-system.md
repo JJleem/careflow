@@ -31,8 +31,9 @@
 ```
 
 - 예약 상태 뱃지 매핑: `confirmed`=info, `completed`=success, `no_show`=warning, `cancelled`=neutral(회색) — 취소는 오류가 아니므로 danger를 쓰지 않는다. danger는 파괴적 액션(삭제 확인)에만.
-- `--color-brand-mint`는 로고/정보성 포인트에 쓰고, 흰 글자가 올라가는 CTA는 대비 확보를 위해 `--color-primary`를 사용한다.
-- 대시보드 차트: primary 계열 단색 + neutral로 절제. 노쇼율 등 경고성 지표만 warning.
+- `--color-brand-mint`(#22BDB8)는 **그래픽 요소 전용** — 로고 심볼, 차트 막대, 아이콘, 딥틸 배경 위 텍스트. 흰 배경 위 텍스트로는 쓰지 않는다(대비 2.32:1로 WCAG 미달). 흰 글자가 올라가는 CTA·흰 배경 위 텍스트/링크는 `--color-primary`(#087D78, 대비 4.98:1)를 쓴다. → **브랜드색(칠하는 색) ≠ 텍스트색의 분리**가 이 시스템의 접근성 원칙.
+- 로고: 실제 회사 로고 대신 **CareFlow 자체 심볼**을 쓴다(상표·public 레포 안전, 추상화 유지). 브랜드 민트 라운드 스퀘어 + 흰 생체신호(pulse) 라인 — "Flow"(흐름)와 건강 신호를 겹친 시그니처. `components/Logo.tsx`.
+- 대시보드 차트: 관심 제품 순위 막대는 brand-mint(그래픽이라 대비 무관), 그 외는 primary·neutral로 절제. 노쇼율 등 경고성 지표만 warning.
 
 ## 5.2 타이포그래피
 

@@ -4,6 +4,7 @@ import { useMetrics } from '../../api/queries/admin'
 import { useAuthStore } from '../../auth/store'
 import { toDateParam } from '../../lib/datetime'
 import ErrorState from '../../components/ErrorState'
+import Logo from '../../components/Logo'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
@@ -37,9 +38,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-surface">
       <header className="sticky top-0 z-10 bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-4xl items-center gap-3 px-4">
-          <span className="text-title-sm font-extrabold tracking-[-0.02em] text-primary">
-            CareFlow
-          </span>
+          <Logo />
           <span className="rounded-pill bg-surface px-2 py-0.5 text-caption font-semibold text-text-secondary">
             관리자
           </span>
@@ -171,7 +170,7 @@ function ProductRanking({ items }: { items: { product: string; count: number }[]
           <span className="w-28 shrink-0 truncate font-semibold">{item.product}</span>
           <div className="h-2 flex-1 overflow-hidden rounded-pill bg-surface">
             <div
-              className="h-full rounded-pill bg-primary"
+              className="h-full rounded-pill bg-brand-mint"
               style={{ width: `${(item.count / max) * 100}%` }}
             />
           </div>

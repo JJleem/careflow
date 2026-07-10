@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Logo from '@/components/Logo'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /** QR 스캔 진입: 토큰 서명 검증 → 이름+전화 본인확인 → 30분 스코프 세션으로 예약 화면 이동.
@@ -63,7 +64,7 @@ export default function ConsultEntryPage() {
         ) : (
           <>
             <CardHeader className="gap-1.5">
-              <p className="text-caption font-bold text-primary">CareFlow</p>
+              <Logo size="sm" className="mb-1" />
               <CardTitle asChild className="text-title-md font-bold tracking-[-0.02em]">
                 <h1>본인확인이 필요해요</h1>
               </CardTitle>
