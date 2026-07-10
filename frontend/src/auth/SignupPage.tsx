@@ -31,10 +31,10 @@ export default function SignupPage() {
     }
     setError(
       response.status === 409
-        ? '이미 가입된 이메일입니다.'
+        ? '이미 가입된 이메일이에요. 로그인으로 이동해 주세요.'
         : response.status === 422
-          ? '입력값을 확인해 주세요.'
-          : '가입에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+          ? '입력한 정보를 다시 확인해 주세요.'
+          : '일시적인 오류예요. 잠시 후 다시 시도해 주세요.',
     )
   }
 
@@ -42,10 +42,13 @@ export default function SignupPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-title-md">회원가입</CardTitle>
-          <CardDescription>검사 키트 구매 시 사용한 정보로 가입해 주세요</CardDescription>
+      <Card className="w-full max-w-sm gap-7 py-8">
+        <CardHeader className="gap-1.5">
+          <p className="text-caption font-bold text-primary">CareFlow</p>
+          <CardTitle className="text-title-md font-bold tracking-[-0.02em]">
+            만나서 반가워요
+          </CardTitle>
+          <CardDescription>검사 키트를 구매할 때 사용한 정보로 가입해 주세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
@@ -67,7 +70,15 @@ export default function SignupPage() {
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">이메일</Label>
-              <Input id="email" type="email" autoComplete="email" required value={form.email} onChange={set('email')} />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="name@example.com"
+                required
+                value={form.email}
+                onChange={set('email')}
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">비밀번호</Label>

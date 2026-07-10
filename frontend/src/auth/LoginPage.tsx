@@ -30,17 +30,20 @@ export default function LoginPage() {
     }
     setError(
       response.status === 401
-        ? '이메일 또는 비밀번호가 올바르지 않습니다.'
-        : '로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+        ? '이메일 또는 비밀번호를 다시 확인해 주세요.'
+        : '일시적인 오류예요. 잠시 후 다시 시도해 주세요.',
     )
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-title-md">CareFlow 로그인</CardTitle>
-          <CardDescription>검사 결과 확인과 상담 예약을 시작하세요</CardDescription>
+      <Card className="w-full max-w-sm gap-7 py-8">
+        <CardHeader className="gap-1.5">
+          <p className="text-caption font-bold text-primary">CareFlow</p>
+          <CardTitle className="text-title-md font-bold tracking-[-0.02em]">
+            다시 만나서 반가워요
+          </CardTitle>
+          <CardDescription>검사 결과 확인부터 상담 예약까지, 로그인하고 시작하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
@@ -50,6 +53,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
+                placeholder="name@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
