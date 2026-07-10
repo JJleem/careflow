@@ -31,6 +31,22 @@ export function useSubjectResults(subjectIds: number[]) {
   })
 }
 
+/** 여러 결과지 병렬 조회 — 상담사 당일 일정에서 각 예약의 검사 종류 표시용 */
+export function useTestResults(ids: number[]) {
+  return useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ['test-results', id],
+      queryFn: async () => {
+        const { data, error, response } = await api.GET('/test-results/{test_result_id}', {
+          params: { path: { test_result_id: id } },
+        })
+        if (!data) throw apiError(response, error)
+        return data
+      },
+    })),
+  })
+}
+
 export function useTestResult(id: number) {
   return useQuery({
     queryKey: ['test-results', id],

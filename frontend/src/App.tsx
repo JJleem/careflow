@@ -5,6 +5,7 @@ import LoginPage from './auth/LoginPage'
 import SignupPage from './auth/SignupPage'
 import { roleHome, useAuthStore } from './auth/store'
 import CustomerLayout from './components/CustomerLayout'
+import WorkLayout from './components/WorkLayout'
 import ConsultEntryPage from './features/consult/ConsultEntryPage'
 import ResultsListPage from './features/customer/ResultsListPage'
 import ResultDetailPage from './features/customer/ResultDetailPage'
@@ -60,9 +61,14 @@ const router = createBrowserRouter([
   {
     element: <RequireRole roles={['counselor']} />,
     children: [
-      { path: '/work/today', element: <TodayPage /> },
-      { path: '/work/records/:reservationId', element: <RecordPage /> },
-      { path: '/work/slots', element: <SlotsPage /> },
+      {
+        element: <WorkLayout />,
+        children: [
+          { path: '/work/today', element: <TodayPage /> },
+          { path: '/work/records/:reservationId', element: <RecordPage /> },
+          { path: '/work/slots', element: <SlotsPage /> },
+        ],
+      },
     ],
   },
   {
