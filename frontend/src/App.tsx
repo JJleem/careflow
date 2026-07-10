@@ -4,6 +4,7 @@ import RequireRole from './auth/RequireRole'
 import LoginPage from './auth/LoginPage'
 import SignupPage from './auth/SignupPage'
 import { roleHome, useAuthStore } from './auth/store'
+import CustomerLayout from './components/CustomerLayout'
 import ConsultEntryPage from './features/consult/ConsultEntryPage'
 import ResultsListPage from './features/customer/ResultsListPage'
 import ResultDetailPage from './features/customer/ResultDetailPage'
@@ -35,16 +36,26 @@ const router = createBrowserRouter([
   {
     element: <RequireRole roles={['customer']} />,
     children: [
-      { path: '/results', element: <ResultsListPage /> },
-      { path: '/results/:id', element: <ResultDetailPage /> },
-      { path: '/my/reservations', element: <MyReservationsPage /> },
-      { path: '/notifications', element: <NotificationsPage /> },
+      {
+        element: <CustomerLayout />,
+        children: [
+          { path: '/results', element: <ResultsListPage /> },
+          { path: '/results/:id', element: <ResultDetailPage /> },
+          { path: '/my/reservations', element: <MyReservationsPage /> },
+          { path: '/notifications', element: <NotificationsPage /> },
+        ],
+      },
     ],
   },
   {
     // 예약은 로그인 고객 + QR 스코프 세션 둘 다 진입 (docs/06 §6.3)
     element: <RequireRole roles={['customer']} allowScopedSession />,
-    children: [{ path: '/reserve', element: <ReservePage /> }],
+    children: [
+      {
+        element: <CustomerLayout />,
+        children: [{ path: '/reserve', element: <ReservePage /> }],
+      },
+    ],
   },
   {
     element: <RequireRole roles={['counselor']} />,
