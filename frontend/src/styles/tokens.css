@@ -97,6 +97,32 @@
 
   --shadow-card: var(--cf-shadow-card);
   --shadow-modal: var(--cf-shadow-modal);
+
+  /* shadcn/ui 컴포넌트 클래스(bg-background, ring-ring, ...)용 —
+     값은 전부 위 :root의 05 토큰 매핑을 통과한다 (기본 팔레트 미사용) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* shadcn 복사 코드의 rounded-sm/md/lg/xl → 05 radius 스케일로 강제 */
+  --radius-sm: 2px;
+  --radius-md: var(--cf-radius-control); /* 버튼·인풋 4px */
+  --radius-lg: var(--cf-radius-card); /* 카드 10px */
+  --radius-xl: var(--cf-radius-modal); /* 모달·시트 20px */
 }
 
 @layer base {
