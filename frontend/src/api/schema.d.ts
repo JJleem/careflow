@@ -672,10 +672,16 @@ export interface components {
             end_at: string;
             /** Subject Id */
             subject_id: number;
+            /** Subject Name */
+            subject_name: string;
             /** Test Result Id */
             test_result_id: number;
             /** Counselor Name */
             counselor_name: string;
+            /** Customer Name */
+            customer_name: string;
+            /** Customer Phone */
+            customer_phone: string;
             /** Pre Question */
             pre_question: string | null;
         };

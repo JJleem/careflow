@@ -51,7 +51,10 @@ export default function RecordPage() {
         </div>
         {reservation && (
           <p className="text-caption text-text-secondary">
-            {formatDate(reservation.start_at)} {formatTime(reservation.start_at)} 상담
+            {reservation.customer_name}
+            {reservation.subject_name !== reservation.customer_name &&
+              ` · ${reservation.subject_name}님 검사`}{' '}
+            · {formatDate(reservation.start_at)} {formatTime(reservation.start_at)} 상담
           </p>
         )}
 
@@ -140,7 +143,10 @@ export default function RecordPage() {
         <h1 className="text-title-md">상담 기록 작성</h1>
         {reservation && (
           <p className="text-caption text-text-secondary">
-            {formatDate(reservation.start_at)} {formatTime(reservation.start_at)} 상담
+            {reservation.customer_name}
+            {reservation.subject_name !== reservation.customer_name &&
+              ` · ${reservation.subject_name}님 검사`}{' '}
+            · {formatDate(reservation.start_at)} {formatTime(reservation.start_at)} 상담
           </p>
         )}
       </div>

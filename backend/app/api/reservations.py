@@ -27,8 +27,11 @@ def _to_response(r: Reservation) -> ReservationResponse:
         start_at=r.start_at,
         end_at=r.end_at,
         subject_id=r.subject_id,
+        subject_name=r.subject.name,
         test_result_id=r.test_result_id,
         counselor_name=r.slot.counselor.user.name,
+        customer_name=r.customer.name,
+        customer_phone=r.customer.phone,
         pre_question=r.pre_question,
     )
 

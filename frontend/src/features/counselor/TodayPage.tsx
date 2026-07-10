@@ -92,6 +92,22 @@ export default function TodayPage() {
                   </span>
                 </div>
 
+                {/* 전화 상담 대상 — 예약자에게 전화, 피검자가 다르면(가족 대리) 함께 표기 */}
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-bold">{r.customer_name}</span>
+                  <a
+                    href={`tel:${r.customer_phone}`}
+                    className="text-caption font-semibold text-primary tabular-nums"
+                  >
+                    {r.customer_phone}
+                  </a>
+                  {r.subject_name !== r.customer_name && (
+                    <span className="text-caption text-text-secondary">
+                      · {r.subject_name}님 검사 결과
+                    </span>
+                  )}
+                </div>
+
                 {r.pre_question && (
                   <p className="rounded-chip bg-surface px-3 py-2 text-caption text-text-secondary">
                     사전 문의 — {r.pre_question}

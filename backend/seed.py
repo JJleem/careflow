@@ -25,6 +25,8 @@ from app.models import (
     ConsultationRecord,
     CounselorProfile,
     DraftSource,
+    Notification,
+    NotificationType,
     Reservation,
     ReservationStatus,
     ServiceType,
@@ -248,6 +250,20 @@ def seed() -> None:
                 "- 구연산·아라비노스는 정상 범위\n"
                 "고객 사전 문의: \"산화 스트레스 지표가 높은데 어떤 영양제가 도움이 될까요?\" — 이 주제를 우선 다루세요."
             )))
+
+        # 오늘 예약의 알림 — 확정 + 하루 전 리마인더는 이미 발송 시점 도래(알림함 노출).
+        # 실제 발송 경로(_create_side_effects+스케줄러)와 동형의 데이터를 심어 데모에서 알림함이 비지 않게 한다.
+        when = t_start.strftime("%m월 %d일 %H:%M")
+        db.add_all([
+            Notification(
+                user_id=cu1.id, reservation_id=today_res.id, type=NotificationType.confirm,
+                message=f"{when} 상담 예약이 확정되었습니다.",
+                scheduled_at=now, sent_at=now),
+            Notification(
+                user_id=cu1.id, reservation_id=today_res.id, type=NotificationType.reminder_24h,
+                message=f"내일 {when} 상담이 예정되어 있습니다.",
+                scheduled_at=t_start - timedelta(days=1), sent_at=t_start - timedelta(days=1)),
+        ])
 
         db.commit()
         print(

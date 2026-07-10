@@ -62,6 +62,7 @@ export default function MyReservationsPage() {
 
       {upcoming.length > 0 && (
         <section className="flex flex-col gap-3" aria-label="다가오는 상담">
+          <h2 className="text-caption font-semibold text-text-secondary">다가오는 상담</h2>
           {upcoming.map((r) => (
             <article key={r.id} className="flex flex-col gap-3 rounded-card bg-card p-5 shadow-card">
               <div className="flex items-center justify-between">

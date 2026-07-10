@@ -38,6 +38,11 @@ class ReservationResponse(BaseModel):
     start_at: datetime
     end_at: datetime
     subject_id: int
+    subject_name: str
     test_result_id: int
     counselor_name: str
+    # 예약자(전화 상담 대상) 정보 — 배정 상담사가 전화를 걸기 위해 필요.
+    # /me/reservations가 역할별로 자기 예약만 반환하므로 배정 상담사에게만 노출된다.
+    customer_name: str
+    customer_phone: str
     pre_question: str | None
