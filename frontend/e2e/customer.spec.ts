@@ -29,12 +29,17 @@ test.describe('고객 플로우', () => {
     await page.getByRole('link', { name: '이 결과로 상담 예약하기' }).click()
     await expect(page).toHaveURL(/\/reserve/)
 
-    // 시드 슬롯은 내일부터 있으므로, 시간대가 나오는 날짜 칩을 찾아 선택한다
+    // 시드 슬롯은 내일부터 있으므로, 시간대가 나오는 날짜 칩을 찾아 선택한다.
+    // 칩 클릭 → 슬롯 조회가 비동기라 로딩 완료를 기다린 뒤 판단해야 한다
+    // (즉시 isVisible 체크는 항상 false — 마지막 칩이 주말인 요일에 실패하는 레이스)
     const days = page.locator('.overflow-x-auto > button')
-    let firstTime = page.locator('div.grid button').first()
+    const firstTime = page.locator('div.grid button').first()
     for (let i = 1; i < 6; i++) {
       await days.nth(i).click()
-      if (await firstTime.isVisible().catch(() => false)) break
+      const hasSlots = await firstTime
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .then(() => true, () => false)
+      if (hasSlots) break
     }
     await expect(firstTime).toBeVisible()
     await firstTime.click()
