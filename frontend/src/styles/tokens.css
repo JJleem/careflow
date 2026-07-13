@@ -147,6 +147,9 @@
     color: var(--cf-color-text);
     font-size: var(--cf-font-size-body);
     line-height: 1.6;
+    /* 한국어 단어 단위 줄바꿈 — break-word는 긴 영문 토큰 넘침 방지 (05 §5.2) */
+    word-break: keep-all;
+    overflow-wrap: break-word;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

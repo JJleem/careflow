@@ -40,6 +40,7 @@
 - 폰트: `Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif` (CDN 없이 로컬/시스템 폴백 허용)
 - 스케일: 28/22/18(제목), 15(본문), 13(보조). 숫자 지표(대시보드 카드)는 32 bold
 - 제목은 `700` + letter-spacing `-0.02em`(또렷하고 단단한 인상), 본문 line-height `1.6` — 얇고 성근 제목이 정적인 인상의 주범
+- 줄바꿈: 전역 `word-break: keep-all` + `overflow-wrap: break-word` — 한국어가 단어 중간에서 꺾이면("전화번/호") 모바일 좁은 폭에서 특히 지저분하다. break-word는 긴 영문 토큰(이메일 등) 넘침 방지용 안전장치
 - 결과지 지표 수치는 tabular-nums로 정렬
 
 ## 5.3 형태·표면·간격
