@@ -46,16 +46,30 @@ SEED_DAYS = 14
 
 # 서비스별 표시명·검사법은 프론트 lib/labels.ts와 동기화할 것 (SERVICE_TYPE_LABEL / SERVICE_METHOD)
 INDICATORS = {
-    # 소변 유기산 검사 — 6개 대사 영역을 대표 마커 하나씩. range는 프론트 파서 호환("a~b"/"x 미만"/"x 이상")
+    # 소변 유기산 검사 — 실제 검사는 64종이지만 데모는 6개 대사 영역을 커버하는 10종으로 큐레이션.
+    # range는 프론트 파서 호환("a~b"/"x 미만"/"x 이상"). 주의 판정(8-OHdG·퀴놀린산)은
+    # 오늘 예약의 사전 문의·AI 브리핑과 한 스토리로 연결되므로 값 변경 금지.
     ServiceType.comprehensive_metabolic: [
         {"name": "구연산 (에너지 생성)", "value": 210, "unit": "mmol/mol Cr", "range": "150~600",
          "comment": "TCA 회로가 원활합니다. 현재 에너지 대사 컨디션을 유지해 주세요."},
+        {"name": "피루브산 (에너지 생성)", "value": 55, "unit": "mmol/mol Cr", "range": "30~90",
+         "comment": "당 대사에서 에너지로 넘어가는 길목 지표로, 정상 범위입니다."},
         {"name": "8-OHdG (항산화)", "value": 6.4, "unit": "ng/mg Cr", "range": "5.0 미만",
          "comment": "산화 스트레스 상승 소견. 항산화 식품(베리류·녹색 채소)과 오메가3를 권장합니다."},
         {"name": "퀴놀린산 (정신건강·집중력)", "value": 3.7, "unit": "mmol/mol Cr", "range": "3.0 미만",
          "comment": "신경 흥분성 대사물이 다소 높습니다. 마그네슘 보충과 수면 관리가 도움이 됩니다."},
+        {"name": "5-HIAA (정신건강·집중력)", "value": 4.2, "unit": "mmol/mol Cr", "range": "2~8",
+         "comment": "세로토닌 대사 지표는 정상 범위입니다."},
+        {"name": "β-하이드록시부티르산 (체중 조절)", "value": 3.8, "unit": "mmol/mol Cr", "range": "10 미만",
+         "comment": "지방 연소(케톤) 대사는 안정적입니다. 급격한 절식 신호는 없습니다."},
         {"name": "아라비노스 (장 건강)", "value": 38, "unit": "mmol/mol Cr", "range": "50 미만",
          "comment": "장내 효모 대사 지표는 정상 범위입니다."},
+        {"name": "힙푸르산 (장 건강)", "value": 310, "unit": "mmol/mol Cr", "range": "150~600",
+         "comment": "장내 유익균 대사가 원활합니다. 식이섬유 섭취를 유지해 주세요."},
+        {"name": "메틸말론산 (신체 방어)", "value": 1.1, "unit": "mmol/mol Cr", "range": "2.0 미만",
+         "comment": "비타민 B12 이용 상태는 양호합니다."},
+        {"name": "오로트산 (신체 방어)", "value": 0.7, "unit": "mmol/mol Cr", "range": "1.5 미만",
+         "comment": "암모니아 해독 부담 지표는 정상 범위입니다."},
     ],
     # 혈액 IgG 음식물 과민증 — 한국인 식품 패널, 0~4 반응 등급
     ServiceType.food_intolerance: [
@@ -67,6 +81,18 @@ INDICATORS = {
          "comment": "정상 범위입니다."},
         {"name": "대두", "value": 1.6, "unit": "등급(0~4)", "range": "0~1",
          "comment": "경계 반응. 발효 대두식품(된장·청국장) 위주로 소량 섭취를 권장합니다."},
+        {"name": "땅콩", "value": 1.3, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "경계 반응. 견과류 단백질원은 아몬드·호두로 다변화해 보세요."},
+        {"name": "아몬드", "value": 0.6, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "정상 범위입니다."},
+        {"name": "새우", "value": 0.3, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "정상 범위입니다."},
+        {"name": "돼지고기", "value": 0.8, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "정상 범위입니다."},
+        {"name": "고등어", "value": 0.5, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "정상 범위입니다."},
+        {"name": "토마토", "value": 0.2, "unit": "등급(0~4)", "range": "0~1",
+         "comment": "정상 범위입니다."},
     ],
     # 모발 미네랄·중금속 — µg/g. 중금속은 상한, 영양 미네랄은 하한 기준
     ServiceType.heavy_metal: [
@@ -74,10 +100,22 @@ INDICATORS = {
          "comment": "기준 초과. 대형 어류 섭취를 줄이고 셀레늄이 풍부한 식품을 권장합니다."},
         {"name": "납 (Pb)", "value": 0.6, "unit": "µg/g", "range": "1.0 미만",
          "comment": "정상 범위입니다."},
+        {"name": "카드뮴 (Cd)", "value": 0.05, "unit": "µg/g", "range": "0.15 미만",
+         "comment": "정상 범위입니다."},
+        {"name": "알루미늄 (Al)", "value": 6.8, "unit": "µg/g", "range": "10 미만",
+         "comment": "정상 범위입니다. 제산제·조리기구 유래 노출은 우려 수준이 아닙니다."},
+        {"name": "비소 (As)", "value": 0.09, "unit": "µg/g", "range": "0.2 미만",
+         "comment": "정상 범위입니다."},
         {"name": "아연 (Zn)", "value": 58, "unit": "µg/g", "range": "70~120",
          "comment": "부족 소견. 아연은 중금속 배출 효소의 보조 인자로 보충이 필요합니다."},
         {"name": "마그네슘 (Mg)", "value": 22, "unit": "µg/g", "range": "30~80",
          "comment": "부족 소견. 근육 이완·수면에 관여하는 미네랄로 견과류·통곡물 섭취를 권장합니다."},
+        {"name": "칼슘 (Ca)", "value": 640, "unit": "µg/g", "range": "250~1200",
+         "comment": "정상 범위입니다."},
+        {"name": "구리 (Cu)", "value": 16, "unit": "µg/g", "range": "10~28",
+         "comment": "정상 범위입니다. 아연 보충 시 구리 균형을 함께 살펴보세요."},
+        {"name": "셀레늄 (Se)", "value": 0.95, "unit": "µg/g", "range": "0.7~1.4",
+         "comment": "정상 범위입니다. 수은 배출을 돕는 미네랄로 현 수준 유지를 권장합니다."},
     ],
 }
 
