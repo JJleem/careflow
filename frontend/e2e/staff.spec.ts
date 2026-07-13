@@ -8,6 +8,12 @@ test.describe('상담사 워크스페이스', () => {
     // 시드된 오늘 예약 + done 브리핑
     await expect(page.getByText('AI 사전 브리핑')).toBeVisible()
     await expect(page.getByText('종합 대사기능 분석')).toBeVisible()
+    // 전화 상담 대상: 고객 이름 + 전화(tel: 링크)
+    await expect(page.getByText('이보람')).toBeVisible()
+    await expect(page.getByRole('link', { name: '010-1000-0001' })).toHaveAttribute(
+      'href',
+      'tel:010-1000-0001',
+    )
     await expect(page.getByRole('button', { name: '완료 처리' })).toBeVisible()
   })
 
