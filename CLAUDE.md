@@ -32,7 +32,7 @@
 - [x] 관리자 대시보드 완료: 지표 카드 4종(총 예약/완료율/노쇼율/전환율)·상태 분해·관심 제품 순위·기간 토글. 백엔드 지표 응답을 MetricsResponse 스키마로 승격(dict→Pydantic, codegen 타입 유입) (a1dda81, 3d41c2c)
 - [x] E2E 스모크 (Playwright) 12종: 인증·역할가드, 고객(결과지·지표판정·QR본인확인·예약생성→취소), 상담사(오늘일정·브리핑·슬롯토글), 관리자(지표). 취소 cleanup으로 멱등 — 재시드 없이 반복 통과. `npm run e2e` (6a1e096)
 - [x] docker frontend 서비스 — 원커맨드 3서비스(db+backend+frontend, NFR-6). 멀티스테이지(node빌드→nginx), /api 프록시+SPA fallback, `docker compose up --build` → localhost:8080 (1e290ff)
-- [ ] README (실행 방법, 데모 시나리오, **스크린샷**, golden path 서사, 산출물 6종 매핑 표)
+- [x] README 완료 — TL;DR·1커맨드(:8080, demo1234)·golden path(역할별 스크린샷 6장 docs/images/)·현재 아키텍처(mermaid)·핵심 설계 결정(테스트 증명)·**확장·운영 설계(K8s/클라우드 mermaid+병목 4종 대응, 구현 없이 설계)**·산출물 6종 매핑·FastAPI 근거. **과제 원문 확인: FastAPI 명시 허용("NestJs 또는 FastApi")이라 방어 불필요, 선택 근거만.**
 
 ## 구현 품질 기준선
 
